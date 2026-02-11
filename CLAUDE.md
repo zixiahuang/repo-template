@@ -1,0 +1,101 @@
+# CLAUDE.MD -- Academic Project Development with Claude Code
+
+<!-- HOW TO USE: Replace [BRACKETED PLACEHOLDERS] with your project info.
+     Keep this file under ~150 lines — Claude loads it every session.
+     See README.md for full documentation. -->
+
+**Project:** [YOUR PROJECT NAME]
+**Institution:** [YOUR INSTITUTION]
+**Branch:** main
+
+---
+
+## Core Principles
+
+- **Plan first** -- enter plan mode before non-trivial tasks; save plans to `quality_reports/plans/`
+- **Verify after** -- compile/render and confirm output at the end of every task
+- **Single source of truth** -- `latex/manuscript.tex` is authoritative for the paper
+- **Quality gates** -- nothing ships below 80/100
+- **[LEARN] tags** -- when corrected, save `[LEARN:category] wrong → right` to MEMORY.md
+
+---
+
+## Folder Structure
+
+```
+[YOUR-PROJECT]/
+├── CLAUDE.MD                    # This file
+├── Makefile                     # Root — delegates to code/ and latex/
+├── .claude/                     # Rules, skills, agents, hooks
+├── code/                        # Analysis code with sub-Makefiles
+│   ├── Makefile                 # Delegates to sub-Makefiles
+│   ├── [task_group]/            # e.g., data cleaning (R) or simulation (Julia)
+│   │   ├── Makefile
+│   │   └── *.R or *.jl
+│   └── [task_group]/
+│       ├── Makefile
+│       └── ...
+├── latex/                       # Paper manuscript and slides
+│   ├── Makefile                 # pdflatex 3-pass build
+│   ├── manuscript.tex           # Main paper
+│   ├── slides.tex               # Presentation slides
+│   ├── latex_extras/            # Preamble files (packages, commands, tables)
+│   └── references/              # .bib and .bst files
+├── output/                      # Code pipeline outputs
+│   ├── figures/                 # Generated figures
+│   ├── tables/                  # Generated tables
+│   └── numbers/                 # Inline numbers for manuscript (\newcommand .txt files)
+├── quality_reports/             # Plans, session logs, merge reports
+└── templates/                   # Session log, quality report templates
+```
+
+---
+
+## Commands
+
+```bash
+# Make (preferred — builds everything)
+make                               # Build all (code + latex)
+make -n                            # Dry-run: show what would be built
+make -C code                       # Build all code targets
+make -C code/[task_group] all      # Build one task group
+make -C latex                      # Compile manuscript
+
+# LaTeX (manual fallback — 3-pass, pdflatex)
+cd latex && pdflatex -interaction=nonstopmode manuscript.tex
+bibtex manuscript
+pdflatex -interaction=nonstopmode manuscript.tex
+pdflatex -interaction=nonstopmode manuscript.tex
+```
+
+---
+
+## Quality Thresholds
+
+| Score | Gate | Meaning |
+|-------|------|---------|
+| 80 | Commit | Good enough to save |
+| 90 | PR | Ready for deployment |
+| 95 | Excellence | Aspirational |
+
+---
+
+## Skills Quick Reference
+
+| Command | What It Does |
+|---------|-------------|
+| `/commit [msg]` | Stage, commit, PR, merge |
+| `/data-analysis [dataset]` | End-to-end R analysis |
+| `/review-r [file]` | R code quality review |
+| `/review-comments [path]` | Clean up comments, docstrings, dead code |
+| `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
+
+---
+
+## Current Project State
+
+| Component | File | Status | Description |
+|-----------|------|--------|-------------|
+| Manuscript | `latex/manuscript.tex` | Template | Paper skeleton with standard sections |
+| Slides | `latex/slides.tex` | Template | Presentation template |
+| Code pipeline | `code/` | Empty | Sub-Makefiles to be added per project |
