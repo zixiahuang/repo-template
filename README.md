@@ -261,3 +261,9 @@ Each `code/[task_group]/Makefile` follows the conventions in `.claude/rules/make
 ## License
 
 MIT License. Use freely for research or any academic purpose.
+
+---
+
+## Acknowledgments
+
+This workflow is heavily based on [Pedro H.C. Sant'Anna's Claude Code workflow](https://github.com/pedrohcgs/claude-code-my-workflow).
