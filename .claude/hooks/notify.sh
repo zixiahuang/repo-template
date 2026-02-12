@@ -1,6 +1,11 @@
 #!/bin/bash
 # macOS desktop notification when Claude needs attention
 # Triggers on: permission prompts, idle prompts, auth events
+# Fails open on non-macOS or missing dependencies
+
+command -v jq >/dev/null 2>&1 || exit 0
+command -v osascript >/dev/null 2>&1 || exit 0
+
 INPUT=$(cat)
 MESSAGE=$(echo "$INPUT" | jq -r '.message // "Claude needs attention"')
 TITLE=$(echo "$INPUT" | jq -r '.title // "Claude Code"')

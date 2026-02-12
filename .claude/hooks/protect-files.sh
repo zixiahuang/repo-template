@@ -1,6 +1,9 @@
 #!/bin/bash
 # Block accidental edits to protected files
 # Customize PROTECTED_PATTERNS below for your project
+# Fail open if jq is not installed
+command -v jq >/dev/null 2>&1 || exit 0
+
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name')
 FILE=""
