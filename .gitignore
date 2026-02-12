@@ -12,6 +12,7 @@ Thumbs.db
 
 # AI coding assistants — local state
 **/.claude/settings.local.json
+.claude/settings.json
 .claude/state/
 .codex/
 .gemini/
