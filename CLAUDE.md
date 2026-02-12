@@ -25,6 +25,7 @@
 ```
 [YOUR-PROJECT]/
 ├── CLAUDE.md                    # This file
+├── MEMORY.md                    # Persistent [LEARN] entries across sessions
 ├── Makefile                     # Root — delegates to code/ and latex/
 ├── .claude/                     # Rules, skills, agents, hooks
 ├── code/                        # Analysis code with sub-Makefiles
@@ -91,6 +92,8 @@ pdflatex -interaction=nonstopmode manuscript.tex
 | `/commit [msg]` | Stage, commit, PR, merge |
 | `/data-analysis [dataset]` | End-to-end R analysis |
 | `/review-r [file]` | R code quality review |
+| `/review-julia [file]` | Julia code quality review |
+| `/review-tex [file]` | LaTeX manuscript review |
 | `/review-comments [path]` | Clean up comments, docstrings, dead code |
 | `/review-pr [PR#]` | Address PR review comments, commit fixes, resolve threads |
 | `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
@@ -103,4 +106,4 @@ pdflatex -interaction=nonstopmode manuscript.tex
 |-----------|------|--------|-------------|
 | Manuscript | `latex/manuscript.tex` | Template | Paper skeleton with standard sections |
 | Slides | `latex/slides.tex` | Template | Presentation template |
-| Code pipeline | `code/` | Empty | Sub-Makefiles to be added per project |
+| Code pipeline | `code/` | Template | Sub-Makefiles to be added per project |

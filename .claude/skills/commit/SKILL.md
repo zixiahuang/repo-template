@@ -57,8 +57,6 @@ gh pr create --title "<short title>" --body "$(cat <<'EOF'
 
 ## Test plan
 <checklist>
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
 )"
 ```

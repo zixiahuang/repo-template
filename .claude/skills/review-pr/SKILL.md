@@ -101,7 +101,7 @@ For each file group, run the orchestrator loop:
 
 **VERIFY:** If a Makefile exists, run `make -n` and build stale targets. Otherwise, run the appropriate compile/render command. Check exit codes. Max 2 retries on failure.
 
-**REVIEW:** If a reviewer agent exists for the file type (e.g., `r-reviewer` for `.R`, `tikz-reviewer` for TikZ), run a quick review pass. Skip if no matching agent.
+**REVIEW:** If a reviewer agent exists for the file type (e.g., `r-reviewer` for `.R`, `tex-reviewer` for `.tex`), run a quick review pass. Skip if no matching agent.
 
 **SCORE:** Apply quality gates. If score < 80 after 2 fix rounds, skip this group and report it as needing user attention.
 

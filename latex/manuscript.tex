@@ -26,8 +26,6 @@
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 \textbf{
 \noindent\LARGE
-\title
-~
 Paper title here
 }
 
@@ -129,15 +127,16 @@ Example citation: \citet{Kalnay1996}.
 %------------------------------------------%
 \FloatBarrier
 \newpage
-\appendix
 \begin{Large}
-\section{Appendix}
+\section*{Appendix}
 \end{Large}
 
 % Reset figure/table #'s
 \setcounter{table}{0}
+\setcounter{figure}{0}
 % Add an A in front of tables and figures
 \renewcommand{\thetable}{A\arabic{table}}
+\renewcommand{\thefigure}{A\arabic{figure}}
 
 \begin{appendices}
 \end{appendices}

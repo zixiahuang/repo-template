@@ -35,6 +35,8 @@ Thumbs.db
 
 # Compiled PDFs (uncomment to track specific PDFs)
 # *.pdf
+latex/manuscript.pdf
+latex/slides.pdf
 
 # Python
 __pycache__/
@@ -68,9 +70,16 @@ vignettes/*.pdf
 *.asv
 *.mat
 
-# Data / Output
-data
-output
+# Julia
+Manifest.toml
+
+# Environment / secrets
+.env*
+
+# Data / Output — ignore contents but keep directory structure
+data/*
+!data/.gitkeep
+output/
 # Output artifacts (uncomment as needed)
 # *.rds
 # output/**/*.rds

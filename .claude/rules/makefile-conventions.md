@@ -109,28 +109,41 @@ export BIBINPUTS := ./references/:
 export BSTINPUTS := ./references/:
 
 MAIN     = manuscript
-SOURCES  = $(MAIN).tex \
-           latex_extras/packages.tex \
-           latex_extras/custom_commands.tex \
-           latex_extras/dynamic_tables.tex \
-           references/references.bib
+SLIDES   = slides
+
+MAIN_SOURCES = $(MAIN).tex \
+               latex_extras/packages.tex \
+               latex_extras/custom_commands.tex \
+               latex_extras/dynamic_tables.tex \
+               references/references.bib
+
+SLIDES_SOURCES = $(SLIDES).tex \
+                 latex_extras/slides_setup.tex \
+                 latex_extras/dynamic_tables.tex \
+                 references/references.bib
 
 .PHONY: all clean
 
-all: $(MAIN).pdf
+all: $(MAIN).pdf $(SLIDES).pdf
 
-$(MAIN).pdf: $(SOURCES)
+$(MAIN).pdf: $(MAIN_SOURCES)
 	$(TEX) $(TEXFLAGS) $(MAIN)
-	-$(BIBTEX) $(MAIN)
+	@if grep -q '\\citation' $(MAIN).aux 2>/dev/null; then $(BIBTEX) $(MAIN); fi
 	$(TEX) $(TEXFLAGS) $(MAIN)
 	$(TEX) $(TEXFLAGS) $(MAIN)
+
+$(SLIDES).pdf: $(SLIDES_SOURCES)
+	$(TEX) $(TEXFLAGS) $(SLIDES)
+	@if grep -q '\\citation' $(SLIDES).aux 2>/dev/null; then $(BIBTEX) $(SLIDES); fi
+	$(TEX) $(TEXFLAGS) $(SLIDES)
+	$(TEX) $(TEXFLAGS) $(SLIDES)
 
 clean:
-	rm -f *.aux *.bbl *.blg *.log *.out *.toc *.fdb_latexmk *.fls \
-	      *.nav *.snm *.vrb *.synctex.gz *.run.xml *-blx.bib
+	rm -f $(MAIN).pdf $(SLIDES).pdf *.aux *.bbl *.blg *.log *.out *.toc \
+	      *.fdb_latexmk *.fls *.nav *.snm *.vrb *.synctex.gz *.run.xml *-blx.bib
 ```
 
-List all `.tex` and `.bib` dependencies in `SOURCES` so Make can detect staleness.
+List all `.tex` and `.bib` dependencies in `MAIN_SOURCES` and `SLIDES_SOURCES` so Make can detect staleness. The conditional bibtex pattern (`@if grep -q '\\citation'`) avoids bibtex errors when there are no citations yet.
 
 ## Validation
 

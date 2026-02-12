@@ -9,6 +9,8 @@ paths:
 
 # Research Project Orchestrator (Simplified)
 
+> **Routing:** Use this simplified loop for single-file R/Julia script tasks. For multi-file or cross-cutting changes, use `orchestrator-protocol.md` instead.
+
 **For R/Julia scripts, simulations, and data analysis** -- use this simplified loop instead of the full multi-agent orchestrator.
 
 ## The Simple Loop

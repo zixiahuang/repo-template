@@ -42,7 +42,7 @@ Then paste the following, filling in your project details:
 
 ### 3. Configure Hooks (Optional)
 
-Hooks are configured per-user in `.claude/settings.json` (gitignored by default). To enable the bundled hooks, create the file:
+Hooks are configured per-user in `.claude/settings.json` (gitignored by default). To enable the bundled hooks, create the file with the format below. The `hooks` key uses nested arrays with optional `matcher` and `timeout` fields. `$CLAUDE_PROJECT_DIR` resolves to the project root at runtime.
 
 ```bash
 cat > .claude/settings.json << 'EOF'
@@ -50,20 +50,47 @@ cat > .claude/settings.json << 'EOF'
   "hooks": {
     "Stop": [
       {
-        "type": "command",
-        "command": "python3 .claude/hooks/log-reminder.py"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/log-reminder.py",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "Notification": [
       {
-        "type": "command",
-        "command": "bash .claude/hooks/notify.sh"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/notify.sh",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PreToolUse": [
       {
-        "type": "command",
-        "command": "bash .claude/hooks/protect-files.sh"
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-files.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-compact.sh",
+            "timeout": 5
+          }
+        ]
       }
     ]
   }
@@ -178,6 +205,7 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 |-------|-------------|
 | `r-reviewer` | R code quality, reproducibility, and domain correctness |
 | `julia-reviewer` | Julia code quality, type stability, and performance |
+| `tex-reviewer` | LaTeX manuscript quality, hardcoded numbers, citation consistency |
 | `verifier` | End-to-end build verification with orphaned script check |
 
 ### Key Skills (`.claude/skills/`)
@@ -187,6 +215,11 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 | `/commit` | Stage, commit, PR, merge (with `make -n` staleness warning) |
 | `/data-analysis` | End-to-end R analysis workflow |
 | `/review-pr [PR#]` | Address PR review comments, commit fixes, resolve threads |
+| `/review-r [file]` | R code quality review via r-reviewer agent |
+| `/review-julia [file]` | Julia code quality review via julia-reviewer agent |
+| `/review-tex [file]` | LaTeX manuscript review via tex-reviewer agent |
+| `/review-comments [path]` | Clean up comments, docstrings, dead code |
+| `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
 
 ### Key Rules (`.claude/rules/`)
 
@@ -200,6 +233,8 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 | `orchestrator-protocol` | Contractor mode: implement, verify via Make, review, fix, score |
 | `orchestrator-research` | Simplified loop for R/Julia scripts |
 | `plan-first-workflow` | Plan mode for non-trivial tasks |
+| `session-logging` | Proactive session logging: post-plan, incremental, end-of-session |
+| `replication-protocol` | Reproducibility standards for data, code, and output |
 
 </details>
 
@@ -215,6 +250,7 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 | Julia | Computation, simulation | [julialang.org](https://julialang.org/downloads/) |
 | pdflatex | Manuscript compilation | Included with TeX Live / MacTeX |
 | [gh CLI](https://cli.github.com/) | PR workflow | `brew install gh` (macOS) |
+| [jq](https://jqlang.github.io/jq/) | Hooks (3 of 4 use it) | `brew install jq` (macOS) |
 
 Not all tools are needed — install only what your project uses. Claude Code is the only hard requirement.
 
@@ -297,6 +333,10 @@ my-project/
 │   ├── slides.tex               # Presentation slides
 │   ├── latex_extras/            # packages.tex, custom_commands.tex, etc.
 │   └── references/              # references.bib, econ.bst
+├── output/                      # Code pipeline outputs (gitignored)
+│   ├── figures/                 # Generated figures
+│   ├── tables/                  # Generated tables
+│   └── numbers/                 # Inline numbers for manuscript
 ├── quality_reports/             # Plans, session logs, merge reports
 └── templates/                   # Session log, quality report templates
 ```
