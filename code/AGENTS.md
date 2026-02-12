@@ -274,6 +274,26 @@ When a single script produces multiple outputs, declare one primary target with 
 - Always use `$<` (first prerequisite) and `$@` (target) automatic variables
 - Never use absolute paths
 
+### Root Makefile Pattern
+
+The project root Makefile delegates to `code/` and `latex/`:
+
+```make
+SUBDIRS = code latex
+
+.PHONY: all clean $(SUBDIRS)
+
+all: $(SUBDIRS)
+
+$(SUBDIRS):
+	$(MAKE) -C $@
+
+clean:
+	for dir in $(SUBDIRS); do $(MAKE) -C $$dir clean; done
+```
+
+The `code/Makefile` in turn delegates to sub-Makefiles in each task-group directory.
+
 ### Validation
 
 - `make -n` (dry-run) must produce a valid plan
