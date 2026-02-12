@@ -32,7 +32,7 @@ Run an end-to-end data analysis in R: load, explore, analyze, and produce public
 1. Read `.claude/rules/r-code-conventions.md` for project standards
 2. Create R script with proper header (title, author, purpose, inputs, outputs)
 3. Load required packages at top (`library()`, never `require()`)
-4. Set seed once at top: `set.seed(42)`
+4. Set seed once at top in YYYYMMDD format: `set.seed(20260211)`
 5. Load and inspect the dataset
 
 ### Phase 2: Exploratory Data Analysis
@@ -101,7 +101,7 @@ library(tidyverse)
 library(fixest)
 library(modelsummary)
 
-set.seed(42)
+set.seed(20260211)  # YYYYMMDD format per r-code-conventions
 
 # Note: output directories are created by the Makefile, not the script
 
