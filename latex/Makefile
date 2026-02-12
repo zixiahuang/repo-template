@@ -27,13 +27,13 @@ all: $(MAIN).pdf $(SLIDES).pdf
 
 $(MAIN).pdf: $(MAIN_SOURCES)
 	$(TEX) $(TEXFLAGS) $(MAIN)
-	-$(BIBTEX) $(MAIN)
+	@if grep -q '\\citation' $(MAIN).aux 2>/dev/null; then $(BIBTEX) $(MAIN); fi
 	$(TEX) $(TEXFLAGS) $(MAIN)
 	$(TEX) $(TEXFLAGS) $(MAIN)
 
 $(SLIDES).pdf: $(SLIDES_SOURCES)
 	$(TEX) $(TEXFLAGS) $(SLIDES)
-	-$(BIBTEX) $(SLIDES)
+	@if grep -q '\\citation' $(SLIDES).aux 2>/dev/null; then $(BIBTEX) $(SLIDES); fi
 	$(TEX) $(TEXFLAGS) $(SLIDES)
 	$(TEX) $(TEXFLAGS) $(SLIDES)
 
