@@ -1,0 +1,52 @@
+# Codex CLI command execution rules (Starlark format)
+# Equivalent of .claude/settings.json permissions
+
+# Git operations
+prefix_rule(pattern=["git", "status"], decision="allow")
+prefix_rule(pattern=["git", "diff"], decision="allow")
+prefix_rule(pattern=["git", "log"], decision="allow")
+prefix_rule(pattern=["git", "branch"], decision="allow")
+prefix_rule(pattern=["git", "add"], decision="allow")
+prefix_rule(pattern=["git", "commit"], decision="allow")
+prefix_rule(pattern=["git", "push"], decision="allow")
+prefix_rule(pattern=["git", "pull"], decision="allow")
+prefix_rule(pattern=["git", "fetch"], decision="allow")
+prefix_rule(pattern=["git", "checkout"], decision="allow")
+prefix_rule(pattern=["git", "merge"], decision="allow")
+prefix_rule(pattern=["git", "stash"], decision="allow")
+
+# GitHub CLI
+prefix_rule(pattern=["gh", "pr"], decision="allow")
+prefix_rule(pattern=["gh", "run"], decision="allow")
+prefix_rule(pattern=["gh", "api"], decision="allow")
+prefix_rule(pattern=["gh", "repo"], decision="allow")
+
+# Build system
+prefix_rule(pattern=["make"], decision="allow")
+prefix_rule(pattern=["bash"], decision="allow")
+
+# LaTeX toolchain
+prefix_rule(pattern=["pdflatex"], decision="allow")
+prefix_rule(pattern=["xelatex"], decision="allow")
+prefix_rule(pattern=["latexmk"], decision="allow")
+prefix_rule(pattern=["bibtex"], decision="allow")
+
+# Scripting languages
+prefix_rule(pattern=["Rscript"], decision="allow")
+prefix_rule(pattern=["julia"], decision="allow")
+prefix_rule(pattern=["python3"], decision="allow")
+
+# PDF tools
+prefix_rule(pattern=["pdfinfo"], decision="allow")
+prefix_rule(pattern=["pdf2svg"], decision="allow")
+prefix_rule(pattern=["gs"], decision="allow")
+prefix_rule(pattern=["pdftk"], decision="allow")
+
+# Utilities
+prefix_rule(pattern=["chmod"], decision="allow")
+prefix_rule(pattern=["open"], decision="allow")
+prefix_rule(pattern=["ls"], decision="allow")
+prefix_rule(pattern=["wc"], decision="allow")
+prefix_rule(pattern=["sort"], decision="allow")
+prefix_rule(pattern=["mkdir"], decision="allow")
+prefix_rule(pattern=["for"], decision="allow")

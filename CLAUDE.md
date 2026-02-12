@@ -24,10 +24,13 @@
 
 ```
 [YOUR-PROJECT]/
-├── CLAUDE.md                    # This file
+├── CLAUDE.md                    # This file (Claude Code instructions)
+├── AGENTS.md                    # Codex CLI instructions
 ├── MEMORY.md                    # Persistent [LEARN] entries across sessions
 ├── Makefile                     # Root — delegates to code/ and latex/
-├── .claude/                     # Rules, skills, agents, hooks
+├── .claude/                     # Claude Code: rules, skills, agents, hooks
+├── .codex/                      # Codex CLI: config and permission rules
+├── .agents/                     # Codex CLI: skill definitions
 ├── code/                        # Analysis code with sub-Makefiles
 │   ├── Makefile                 # Delegates to sub-Makefiles
 │   ├── [task_group]/            # e.g., data cleaning (R) or simulation (Julia)

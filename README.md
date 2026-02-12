@@ -1,12 +1,14 @@
-# My Claude Code Setup (Make + R/Julia)
+# AI-Assisted Academic Research Template (Make + R/Julia)
 
-> **Work in progress.** This is a summary of how I use Claude Code for computational research — running analysis pipelines with Make, writing R and Julia scripts, and managing build dependencies. I keep updating these files as I learn new things.
+> **Work in progress.** This is a summary of how I use AI coding assistants for computational research — running analysis pipelines with Make, writing R and Julia scripts, and managing build dependencies. I keep updating these files as I learn new things.
 
-A ready-to-fork starter kit for researchers using [Claude Code](https://code.claude.com/docs/en/overview) with **Make + R + Julia** build systems. You describe what you want; Claude plans the approach, implements it, builds via Make, runs specialized review agents, fixes issues, and presents results — like a contractor who handles the entire job.
+A ready-to-fork starter kit for researchers using [Claude Code](https://code.claude.com/docs/en/overview) or [OpenAI Codex CLI](https://github.com/openai/codex) with **Make + R + Julia** build systems. You describe what you want; the assistant plans the approach, implements it, builds via Make, runs specialized review skills, fixes issues, and presents results — like a contractor who handles the entire job.
+
+**Both tools are supported.** Claude Code uses `.claude/` + `CLAUDE.md`; Codex CLI uses `.codex/` + `.agents/` + `AGENTS.md`. The same workflow, quality gates, and skills work with either.
 
 ---
 
-## Quick Start (5 minutes)
+## Quick Start: Claude Code (5 minutes)
 
 ### 1. Fork & Clone
 
@@ -97,6 +99,55 @@ cat > .claude/settings.json << 'EOF'
 }
 EOF
 ```
+
+---
+
+## Quick Start: Codex CLI (5 minutes)
+
+### 1. Fork & Clone
+
+Same as above — fork this repo, clone it, and `cd` into it.
+
+### 2. Start Codex CLI and Paste This Prompt
+
+```bash
+codex
+```
+
+Then paste the same project-description prompt as the Claude Code section above.
+
+**What this does:** Codex reads `AGENTS.md` (root + `code/AGENTS.md` + `latex/AGENTS.md`), understands the full workflow, and configures the project.
+
+### 3. Configuration
+
+Codex project configuration lives in:
+
+- **`AGENTS.md`** (root) — project instructions and workflow rules (loaded every session)
+- **`code/AGENTS.md`** — R, Julia, and Makefile conventions (loaded when working in `code/`)
+- **`latex/AGENTS.md`** — LaTeX conventions (loaded when working in `latex/`)
+- **`.codex/config.toml`** — model, sandbox, and approval settings
+- **`.codex/rules/default.rules`** — command execution permissions (Starlark format)
+- **`.agents/skills/*/SKILL.md`** — reusable skill definitions
+
+### Codex vs Claude Code: Key Differences
+
+| Aspect | Claude Code | Codex CLI |
+|--------|-------------|-----------|
+| Instructions file | `CLAUDE.md` | `AGENTS.md` (hierarchical) |
+| Settings | `.claude/settings.json` (JSON) | `.codex/config.toml` (TOML) |
+| Permission rules | Glob patterns in settings.json | `.codex/rules/default.rules` (Starlark) |
+| Behavioral rules | `.claude/rules/*.md` (separate files) | Inlined into `AGENTS.md` hierarchy |
+| Agent definitions | `.claude/agents/*.md` | Inlined into review skills |
+| Skills | `.claude/skills/*/SKILL.md` | `.agents/skills/*/SKILL.md` |
+| Hooks | `.claude/hooks/*` | Not supported (use git hooks) |
+
+### Known Limitations (Codex)
+
+Codex CLI does not support hooks, so these Claude Code features have no direct equivalent:
+- **File protection** (`.claude/hooks/protect-files.sh`) — be careful editing `references.bib` and `settings.json`
+- **Session log reminders** (`.claude/hooks/log-reminder.py`) — manually update session logs
+- **Context snapshot before compaction** (`.claude/hooks/pre-compact.sh`) — save context to plans/ manually
+- **Desktop notifications** (`.claude/hooks/notify.sh`) — not available
 
 ---
 
@@ -237,6 +288,17 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 | `bash-conventions` | One command per Bash call for permission glob matching |
 | `replication-protocol` | Reproducibility standards for data, code, and output |
 
+### Codex CLI Configuration
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `AGENTS.md` (root) | Project root | Core instructions + workflow rules |
+| `code/AGENTS.md` | `code/` | R, Julia, Makefile conventions |
+| `latex/AGENTS.md` | `latex/` | LaTeX conventions |
+| `.codex/config.toml` | `.codex/` | Model, sandbox, approval settings |
+| `.codex/rules/default.rules` | `.codex/rules/` | Command execution permissions (Starlark) |
+| `.agents/skills/*/SKILL.md` | `.agents/skills/` | 8 reusable skills (same as Claude) |
+
 </details>
 
 ---
@@ -245,15 +307,15 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 
 | Tool | Required For | Install |
 |------|-------------|---------|
-| [Claude Code](https://code.claude.com/docs/en/overview) | Everything | `npm install -g @anthropic-ai/claude-code` |
+| [Claude Code](https://code.claude.com/docs/en/overview) or [Codex CLI](https://github.com/openai/codex) | AI assistant | `npm install -g @anthropic-ai/claude-code` or `npm install -g @openai/codex` |
 | [GNU Make](https://www.gnu.org/software/make/) | Build system | Pre-installed on macOS/Linux |
 | R | Data analysis, figures | [r-project.org](https://www.r-project.org/) |
 | Julia | Computation, simulation | [julialang.org](https://julialang.org/downloads/) |
 | pdflatex | Manuscript compilation | Included with TeX Live / MacTeX |
 | [gh CLI](https://cli.github.com/) | PR workflow | `brew install gh` (macOS) |
-| [jq](https://jqlang.github.io/jq/) | Hooks (3 of 4 use it) | `brew install jq` (macOS) |
+| [jq](https://jqlang.github.io/jq/) | Claude Code hooks (3 of 4 use it) | `brew install jq` (macOS) |
 
-Not all tools are needed — install only what your project uses. Claude Code is the only hard requirement.
+Not all tools are needed — install only what your project uses. Either Claude Code or Codex CLI is the only hard requirement.
 
 ---
 
@@ -314,9 +376,12 @@ The same `TEXINPUTS` mechanism resolves figures (`output/figures/`) and tables (
 
 ```
 my-project/
-├── CLAUDE.md                    # Project config (loaded every session)
+├── CLAUDE.md                    # Claude Code instructions (loaded every session)
+├── AGENTS.md                    # Codex CLI instructions (loaded every session)
 ├── Makefile                     # Root — delegates to code/ and latex/
-├── .claude/                     # Rules, skills, agents, hooks
+├── .claude/                     # Claude Code: rules, skills, agents, hooks
+├── .codex/                      # Codex CLI: config and permission rules
+├── .agents/                     # Codex CLI: skill definitions
 ├── code/
 │   ├── Makefile                 # Delegates to sub-Makefiles
 │   ├── [task_group_a]/          # e.g., data cleaning (R)

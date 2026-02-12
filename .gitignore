@@ -14,7 +14,12 @@ Thumbs.db
 **/.claude/settings.local.json
 .claude/settings.json
 .claude/state/
-.codex/
+# Codex CLI -- track config and rules, ignore local state
+.codex/*
+!.codex/config.toml
+!.codex/rules
+.codex/rules/*
+!.codex/rules/default.rules
 .gemini/
 
 # LaTeX build artifacts
