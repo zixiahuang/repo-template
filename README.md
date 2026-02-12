@@ -129,6 +129,21 @@ You describe a task. Claude:
 
 If the score meets threshold, Claude presents a summary. Say "just do it" and it auto-commits too.
 
+### PR Review (`/review-pr`)
+
+When reviewers leave comments on a pull request, `/review-pr <PR#>` automates the triage-fix-reply loop:
+
+1. **Fetches** all unresolved review threads via GitHub's GraphQL API
+2. **Classifies** each thread by confidence:
+   - **HIGH** — clear code fix (typo, bug, missing import). Implements, commits, replies with the commit hash, and resolves the thread.
+   - **MEDIUM** — ambiguous but likely intent. Implements and stages changes but does *not* commit. Presents the interpretation for your approval.
+   - **LOW** — design question or unclear fix. Reports the thread with a suggested approach. No code changes.
+3. **Groups** fixes by file so each commit is atomic
+4. **Runs the orchestrator mini-loop** on each group (implement, verify via Make, review, score)
+5. **Pushes** and prints a summary table of what was addressed, what needs approval, and what needs your input
+
+Outdated threads (code has moved since the comment) are reported but never touched.
+
 ### Specialized Agents
 
 Focused agents each check one dimension:
@@ -171,6 +186,7 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 |-------|-------------|
 | `/commit` | Stage, commit, PR, merge (with `make -n` staleness warning) |
 | `/data-analysis` | End-to-end R analysis workflow |
+| `/review-pr [PR#]` | Address PR review comments, commit fixes, resolve threads |
 
 ### Key Rules (`.claude/rules/`)
 
