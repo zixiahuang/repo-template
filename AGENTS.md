@@ -230,6 +230,19 @@ quality_reports/plans/YYYY-MM-DD_short-description.md
 
 Format: Status (DRAFT/APPROVED/COMPLETED), approach, files to modify, verification steps.
 
+### Context Management
+
+- Prefer auto-compression over manual context clearing
+- Save important context to disk before it is lost
+- Use context clearing only when the working context is genuinely polluted
+
+### Session Recovery
+
+After compression or a new session:
+1. Read `AGENTS.md` and the most recent plan in `quality_reports/plans/`
+2. Check `git log --oneline -10` and `git diff`
+3. State what you understand the current task to be
+
 ---
 
 ## Quality Gates & Scoring Rubrics
@@ -387,6 +400,15 @@ Before writing any code:
 - Match original specification exactly
 - Save all intermediate results as RDS or JLD2
 
+#### Stata to R Translation Pitfalls
+
+| Stata | R | Trap |
+|-------|---|------|
+| `reg y x, cluster(id)` | `feols(y ~ x, cluster = ~id)` | Stata clusters df-adjust differently from some R packages |
+| `areg y x, absorb(id)` | `feols(y ~ x \| id)` | Check demeaning method matches |
+| `probit` for PS | `glm(family=binomial(link="probit"))` | R default logit differs from probit defaults in some workflows |
+| `bootstrap, reps(999)` | Depends on method | Match seed, reps, and bootstrap type exactly |
+
 ### Phase 3: Verify Match
 
 | Type | Tolerance | Rationale |
@@ -398,6 +420,32 @@ Before writing any code:
 | Percentages | < 0.1pp | Display rounding |
 
 **If mismatch:** Do NOT proceed to extensions. Isolate which step introduces the difference.
+
+#### Replication Report
+
+Save to `quality_reports/[project]_replication_report.md`:
+
+```markdown
+# Replication Report: [Paper Author (Year)]
+**Date:** [YYYY-MM-DD]
+**Original language:** [Stata/R/etc.]
+**R translation:** [script path]
+
+## Summary
+- **Targets checked / Passed / Failed:** N / M / K
+- **Overall:** [REPLICATED / PARTIAL / FAILED]
+
+## Results Comparison
+
+| Target | Paper | Ours | Diff | Status |
+|--------|-------|------|------|--------|
+
+## Discrepancies (if any)
+- **Target:** X | **Investigation:** ... | **Resolution:** ...
+
+## Environment
+- R version, key packages (with versions), data source
+```
 
 ### Phase 4: Only Then Extend
 
