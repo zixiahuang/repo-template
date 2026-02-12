@@ -1,5 +1,10 @@
 # Codex CLI project configuration
 # Override these defaults in ~/.codex/config.toml for user-level settings
 
-model = "gpt-5.3-codex"
-model_reasoning_effort = "xhigh"
+model = "o4-mini"
+approval_policy = "unless-allow-listed"
+sandbox_mode = "permissive"
+
+[history]
+persistence = "per-project"
+max_entries = 500
