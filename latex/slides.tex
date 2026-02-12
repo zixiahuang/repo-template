@@ -2,7 +2,7 @@
 %\documentclass[english,11pt,aspectratio=1610]{beamer}
 
 % slides set up
-\include{latex_extras/slides_setup.tex}
+\input{slides_setup.tex}
 
 % START HERE ------------------------------------------------------------
 
@@ -39,18 +39,19 @@
 minimum width=1.5cm,align=center,text depth=.25ex,outer sep=0.5pt]
 \tikzstyle{every path}+=[thick, rounded corners]
 
-\begin{frame}[c]{Hurricanes are devastating}
+\begin{frame}[c]{Example slide with figure}
     \begin{columns}
-        \begin{column}{0.55\textwidth}
+        \begin{column}{0.45\textwidth}
            \begin{itemize} \itemsep 1em
-               \item[] Annual US hurricane costs are tens of billions per year
-               \item[] This totals around 0.25\% of GDP
-               \item[] Costs are expected to rise in the future due to climate change and growth
+               \item[] First key point
+               \item[] Second key point
+               \item[] Third key point
            \end{itemize}
         \end{column}
-        \begin{column}{0.55\textwidth}  %%<--- here
+        \begin{column}{0.45\textwidth}
             \begin{center}
-                \includegraphics[width=\linewidth]{output/figures/katrina.jpeg}
+                % \includegraphics[width=\linewidth]{your_figure.pdf}
+                [Your figure here]
              \end{center}
         \end{column}
     \end{columns}
@@ -59,8 +60,8 @@ minimum width=1.5cm,align=center,text depth=.25ex,outer sep=0.5pt]
 
 \begin{frame}<presentation:0>
   \begin{singlespace}
-    \bibliographystyle{references/econ}
-    \bibliography{references/hurricane-references}{}
+    \bibliographystyle{econ}
+    \bibliography{references}{}
     \end{singlespace}
 \end{frame}
 
