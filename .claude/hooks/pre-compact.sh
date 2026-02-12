@@ -1,6 +1,9 @@
 #!/bin/bash
 # Save a context snapshot to the session log before compaction
 # Helps preserve key decisions when auto-compression triggers
+# Fail open if jq is not installed
+command -v jq >/dev/null 2>&1 || exit 0
+
 INPUT=$(cat)
 TRIGGER=$(echo "$INPUT" | jq -r '.trigger // "unknown"')
 
