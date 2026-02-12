@@ -40,6 +40,37 @@ Then paste the following, filling in your project details:
 
 **What this does:** Claude reads all the configuration files, sets up your `code/` directory with sub-Makefiles for each pipeline stage, fills in your project details, then enters contractor mode — planning, implementing, reviewing, and verifying autonomously.
 
+### 3. Configure Hooks (Optional)
+
+Hooks are configured per-user in `.claude/settings.json` (gitignored by default). To enable the bundled hooks, create the file:
+
+```bash
+cat > .claude/settings.json << 'EOF'
+{
+  "hooks": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python3 .claude/hooks/log-reminder.py"
+      }
+    ],
+    "Notification": [
+      {
+        "type": "command",
+        "command": "bash .claude/hooks/notify.sh"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "bash .claude/hooks/protect-files.sh"
+      }
+    ]
+  }
+}
+EOF
+```
+
 ---
 
 ## How It Works
@@ -266,4 +297,4 @@ MIT License. Use freely for research or any academic purpose.
 
 ## Acknowledgments
 
-This workflow is heavily based on [Pedro H.C. Sant'Anna's Claude Code workflow](https://github.com/pedrohcgs/claude-code-my-workflow).
+This workflow is heavily based on [Pedro H.C. Sant'Anna's Claude Code workflow](https://github.com/pedrohcgs/pedro-claude-code-workflow).
