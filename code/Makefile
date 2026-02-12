@@ -16,4 +16,4 @@ $(SUBDIRS):
 	$(MAKE) -C $@
 
 clean:
-	for dir in $(SUBDIRS); do $(MAKE) -C $$dir clean; done
+	@if [ -n "$(SUBDIRS)" ]; then for dir in $(SUBDIRS); do $(MAKE) -C $$dir clean; done; fi

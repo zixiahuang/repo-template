@@ -62,7 +62,10 @@ make -C code/[task_group] all      # Build one task group
 make -C latex                      # Compile manuscript
 
 # LaTeX (manual fallback — 3-pass, pdflatex)
-cd latex && pdflatex -interaction=nonstopmode manuscript.tex
+cd latex
+export TEXINPUTS=.:./latex_extras/:../output/numbers/:../output/tables/:../output/figures/:
+export BIBINPUTS=./references/:
+pdflatex -interaction=nonstopmode manuscript.tex
 bibtex manuscript
 pdflatex -interaction=nonstopmode manuscript.tex
 pdflatex -interaction=nonstopmode manuscript.tex

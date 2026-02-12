@@ -17,7 +17,7 @@ If a Makefile governs the files being modified:
 4. Then proceed to file-specific checks below
 
 ## For LaTeX Manuscript:
-1. Compile with `make -C latex` (or `pdflatex` manually) and check for errors
+1. Compile with `make -C latex` (preferred — handles TEXINPUTS/BIBINPUTS automatically). For manual runs, first `export TEXINPUTS=.:./latex_extras/:../output/numbers/:../output/tables/:../output/figures/:` and `export BIBINPUTS=./references/:` from the `latex/` directory. Check for errors
 2. Verify PDF was generated with non-zero size
 3. Check for overfull hbox warnings
 4. Check for undefined citations
