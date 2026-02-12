@@ -106,6 +106,7 @@ TEXFLAGS = -interaction=nonstopmode
 # Resolve \input and \includegraphics from output/ subdirs without ../output/ prefixes
 export TEXINPUTS := .:./latex_extras/:../output/numbers/:../output/tables/:../output/figures/:
 export BIBINPUTS := ./references/:
+export BSTINPUTS := ./references/:
 
 MAIN     = manuscript
 SOURCES  = $(MAIN).tex \

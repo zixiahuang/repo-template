@@ -1,4 +1,4 @@
-# CLAUDE.MD -- Academic Project Development with Claude Code
+# CLAUDE.md -- Academic Project Development with Claude Code
 
 <!-- HOW TO USE: Replace [BRACKETED PLACEHOLDERS] with your project info.
      Keep this file under ~150 lines — Claude loads it every session.
@@ -24,7 +24,7 @@
 
 ```
 [YOUR-PROJECT]/
-├── CLAUDE.MD                    # This file
+├── CLAUDE.md                    # This file
 ├── Makefile                     # Root — delegates to code/ and latex/
 ├── .claude/                     # Rules, skills, agents, hooks
 ├── code/                        # Analysis code with sub-Makefiles
@@ -65,6 +65,7 @@ make -C latex                      # Compile manuscript
 cd latex
 export TEXINPUTS=.:./latex_extras/:../output/numbers/:../output/tables/:../output/figures/:
 export BIBINPUTS=./references/:
+export BSTINPUTS=./references/:
 pdflatex -interaction=nonstopmode manuscript.tex
 bibtex manuscript
 pdflatex -interaction=nonstopmode manuscript.tex
