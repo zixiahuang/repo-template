@@ -70,7 +70,6 @@ vignettes/*.pdf
 # Data / Output
 data
 output
-*.csv
 # Output artifacts (uncomment as needed)
 # *.rds
 # output/**/*.rds
