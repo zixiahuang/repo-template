@@ -4,6 +4,9 @@ SUBDIRS = code latex
 
 all: $(SUBDIRS)
 
+# latex depends on code so `make -j` builds them in order
+latex: code
+
 $(SUBDIRS):
 	$(MAKE) -C $@
 
