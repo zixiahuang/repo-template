@@ -234,6 +234,7 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 | `orchestrator-research` | Simplified loop for R/Julia scripts |
 | `plan-first-workflow` | Plan mode for non-trivial tasks |
 | `session-logging` | Proactive session logging: post-plan, incremental, end-of-session |
+| `bash-conventions` | One command per Bash call for permission glob matching |
 | `replication-protocol` | Reproducibility standards for data, code, and output |
 
 </details>
