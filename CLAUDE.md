@@ -91,6 +91,7 @@ pdflatex -interaction=nonstopmode manuscript.tex
 | `/data-analysis [dataset]` | End-to-end R analysis |
 | `/review-r [file]` | R code quality review |
 | `/review-comments [path]` | Clean up comments, docstrings, dead code |
+| `/review-pr [PR#]` | Address PR review comments, commit fixes, resolve threads |
 | `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
 
 ---
