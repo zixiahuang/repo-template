@@ -1,0 +1,10 @@
+# Codex CLI project configuration
+# Override these defaults in ~/.codex/config.toml for user-level settings
+
+model = "o4-mini"
+approval_policy = "unless-allow-listed"
+sandbox_mode = "permissive"
+
+[history]
+persistence = "per-project"
+max_entries = 500

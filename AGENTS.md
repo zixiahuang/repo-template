@@ -1,0 +1,417 @@
+# AGENTS.md -- Academic Project Development with Codex CLI
+
+<!-- HOW TO USE: Replace [BRACKETED PLACEHOLDERS] with your project info.
+     Keep this file under 32KB -- Codex loads it every session.
+     Code-specific conventions are in code/AGENTS.md.
+     LaTeX-specific conventions are in latex/AGENTS.md. -->
+
+**Project:** [YOUR PROJECT NAME]
+**Institution:** [YOUR INSTITUTION]
+**Branch:** main
+
+---
+
+## Core Principles
+
+- **Plan first** -- think through the approach before non-trivial tasks; save plans to `quality_reports/plans/`
+- **Verify after** -- compile/render and confirm output at the end of every task
+- **Single source of truth** -- `latex/manuscript.tex` is authoritative for the paper
+- **Quality gates** -- nothing ships below 80/100
+- **[LEARN] tags** -- when corrected, save `[LEARN:category] wrong -> right` to MEMORY.md
+
+---
+
+## Folder Structure
+
+```
+[YOUR-PROJECT]/
+├── AGENTS.md                    # This file (Codex instructions)
+├── CLAUDE.md                    # Claude Code instructions
+├── MEMORY.md                    # Persistent [LEARN] entries across sessions
+├── Makefile                     # Root -- delegates to code/ and latex/
+├── .codex/                      # Codex CLI config and rules
+│   ├── config.toml              # Model, sandbox, approval settings
+│   └── rules/
+│       └── default.rules        # Command execution permissions (Starlark)
+├── .agents/                     # Codex skills
+│   └── skills/                  # Skill definitions
+├── .claude/                     # Claude Code rules, skills, agents, hooks
+├── code/                        # Analysis code with sub-Makefiles
+│   ├── AGENTS.md                # R/Julia/Makefile conventions (Codex)
+│   ├── Makefile                 # Delegates to sub-Makefiles
+│   └── [task_group]/            # e.g., data cleaning, estimation, figures
+│       ├── Makefile
+│       └── *.R or *.jl
+├── latex/                       # Paper manuscript and slides
+│   ├── AGENTS.md                # LaTeX conventions (Codex)
+│   ├── Makefile                 # pdflatex 3-pass build
+│   ├── manuscript.tex           # Main paper
+│   ├── slides.tex               # Presentation slides
+│   ├── latex_extras/            # Preamble files (packages, commands, tables)
+│   └── references/              # .bib and .bst files
+├── output/                      # Code pipeline outputs
+│   ├── figures/                 # Generated figures
+│   ├── tables/                  # Generated tables
+│   └── numbers/                 # Inline numbers for manuscript (\newcommand .txt files)
+├── quality_reports/             # Plans, session logs, merge reports
+└── templates/                   # Session log, quality report templates
+```
+
+---
+
+## Commands
+
+```bash
+# Make (preferred -- builds everything)
+make                               # Build all (code + latex)
+make -n                            # Dry-run: show what would be built
+make -C code                       # Build all code targets
+make -C code/[task_group] all      # Build one task group
+make -C latex                      # Compile manuscript
+
+# LaTeX (manual fallback -- 3-pass, pdflatex)
+cd latex
+export TEXINPUTS=.:./latex_extras/:../output/numbers/:../output/tables/:../output/figures/:
+export BIBINPUTS=./references/:
+export BSTINPUTS=./references/:
+pdflatex -interaction=nonstopmode manuscript.tex
+bibtex manuscript
+pdflatex -interaction=nonstopmode manuscript.tex
+pdflatex -interaction=nonstopmode manuscript.tex
+```
+
+---
+
+## Quality Thresholds
+
+| Score | Gate | Meaning |
+|-------|------|---------|
+| 80 | Commit | Good enough to save |
+| 90 | PR | Ready for deployment |
+| 95 | Excellence | Aspirational |
+
+---
+
+## Skills Quick Reference
+
+| Command | What It Does |
+|---------|-------------|
+| `/commit [msg]` | Stage, commit, PR, merge |
+| `/data-analysis [dataset]` | End-to-end R analysis |
+| `/review-r [file]` | R code quality review |
+| `/review-julia [file]` | Julia code quality review |
+| `/review-tex [file]` | LaTeX manuscript review |
+| `/review-comments [path]` | Clean up comments, docstrings, dead code |
+| `/review-pr [PR#]` | Address PR review comments, commit fixes, resolve threads |
+| `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
+
+---
+
+## Current Project State
+
+| Component | File | Status | Description |
+|-----------|------|--------|-------------|
+| Manuscript | `latex/manuscript.tex` | Template | Paper skeleton with standard sections |
+| Slides | `latex/slides.tex` | Template | Presentation template |
+| Code pipeline | `code/` | Template | Sub-Makefiles to be added per project |
+
+---
+
+## Orchestrator Protocol: Contractor Mode
+
+> Use this full loop for multi-file or cross-cutting changes. For single-file R/Julia script tasks, use the simplified research orchestrator below.
+
+**After a plan is approved, the orchestrator takes over autonomously.**
+
+### The Loop
+
+```
+Plan approved -> orchestrator activates
+  |
+  Step 1: IMPLEMENT -- Execute plan steps
+  |
+  Step 2: VERIFY -- Run `make -n` to check staleness; build stale targets
+  |         If Makefile exists: `make -C code/[dir] [target]` or `make -C latex`
+  |         Otherwise: compile/render/run directly
+  |         If verification fails -> fix -> re-verify
+  |
+  Step 3: REVIEW -- Run appropriate review skill (/review-r, /review-julia, /review-tex)
+  |
+  Step 4: FIX -- Apply fixes (critical -> major -> minor)
+  |
+  Step 5: RE-VERIFY -- Confirm fixes are clean
+  |
+  Step 6: SCORE -- Apply quality-gates rubric
+  |
+  └── Score >= threshold?
+        YES -> Present summary to user
+        NO  -> Loop back to Step 3 (max 5 rounds)
+              After max rounds -> present with remaining issues
+```
+
+### Limits
+
+- **Main loop:** max 5 review-fix rounds
+- **Critic-fixer sub-loop:** max 5 rounds
+- **Verification retries:** max 2 attempts
+- Never loop indefinitely
+
+### "Just Do It" Mode
+
+When user says "just do it" / "handle it":
+- Skip final approval pause
+- Auto-commit if score >= 80
+- Still run the full verify-review-fix loop
+- Still present the summary
+
+---
+
+## Research Orchestrator (Simplified)
+
+> Use this simplified loop for single-file R/Julia script tasks.
+
+```
+Plan approved -> orchestrator activates
+  |
+  Step 1: IMPLEMENT -- Execute plan steps
+  |
+  Step 2: VERIFY -- Run `make -n` to check staleness; build stale targets
+  |         If Makefile exists: `make -C code/[dir] [target]` or `make -C latex`
+  |         Otherwise: `Rscript` / `julia` / `pdflatex` directly
+  |         R scripts: runs without error, outputs created
+  |         Julia scripts: runs without error, CSV/JLD2 created
+  |         Simulations: set.seed / Random.seed! reproducibility
+  |         Plots: PDF/PNG created, correct format
+  |         If verification fails -> fix -> re-verify
+  |
+  Step 3: SCORE -- Apply quality-gates rubric
+  |
+  └── Score >= 80?
+        YES -> Done (commit when user signals)
+        NO  -> Fix blocking issues, re-verify, re-score
+```
+
+**No 5-round loops. No multi-agent reviews. Just: write, test, done.**
+
+### Verification Checklist
+
+- [ ] `make -n` shows no stale targets (or targets rebuilt successfully)
+- [ ] Script runs without errors (R and/or Julia)
+- [ ] All packages loaded at top (R: `library()`, Julia: top-level `using`)
+- [ ] No hardcoded absolute paths
+- [ ] `set.seed()` / `Random.seed!()` once at top if stochastic
+- [ ] Output files created at expected paths
+- [ ] Tolerance checks pass (if applicable)
+- [ ] No hardcoded computed results in manuscript prose
+- [ ] Quality score >= 80
+
+---
+
+## Plan-First Workflow
+
+**For any non-trivial task, plan before writing code.**
+
+### The Protocol
+
+1. **Think through the approach** before coding
+2. **Check MEMORY.md** for `[LEARN]` entries relevant to this task
+3. **Draft the plan** -- what changes, which files, in what order
+4. **Save to disk** -- write to `quality_reports/plans/YYYY-MM-DD_short-description.md`
+5. **Present to user** -- wait for approval
+6. **Implement via orchestrator** after approval
+
+### Plans on Disk
+
+Plans survive context loss. Save every plan to:
+
+```
+quality_reports/plans/YYYY-MM-DD_short-description.md
+```
+
+Format: Status (DRAFT/APPROVED/COMPLETED), approach, files to modify, verification steps.
+
+---
+
+## Quality Gates & Scoring Rubrics
+
+### LaTeX Manuscript (.tex)
+
+| Severity | Issue | Deduction |
+|----------|-------|-----------|
+| Critical | pdflatex compilation failure | -100 |
+| Critical | Undefined citation | -15 |
+| Critical | Overfull hbox > 10pt | -10 |
+| Critical | Typo in equation | -10 |
+| Critical | Hardcoded result (macro exists but unused) | -15 |
+| Major | Missing bibliography entries | -5 |
+| Major | Likely computed result with no macro | -5 |
+| Major | output/numbers/ file missing from Makefile dependencies | -5 |
+| Minor | Long lines (>100 chars) | -1 (EXCEPT documented math formulas) |
+
+### R Scripts (.R)
+
+| Severity | Issue | Deduction |
+|----------|-------|-----------|
+| Critical | Syntax errors | -100 |
+| Critical | Domain-specific bugs | -30 |
+| Critical | Hardcoded absolute paths | -20 |
+| Major | Missing set.seed() | -10 |
+| Major | Missing figure generation | -5 |
+
+### Julia Scripts (.jl)
+
+| Severity | Issue | Deduction |
+|----------|-------|-----------|
+| Critical | Runtime errors | -100 |
+| Critical | Domain-specific bugs | -30 |
+| Critical | Hardcoded absolute paths | -20 |
+| Major | Type instability in hot loops | -15 |
+| Major | Missing `Random.seed!()` | -10 |
+| Major | Abstract-typed struct fields | -5 |
+| Major | Missing persistence (no CSV/JLD2 export) | -5 |
+| Minor | Unfused broadcasts (`.+` instead of `@.`) | -2 |
+| Minor | Globals captured in loops without `let` | -2 |
+
+### Makefile
+
+| Severity | Issue | Deduction |
+|----------|-------|-----------|
+| Critical | Circular dependencies | -100 |
+| Critical | Missing prerequisites (stale builds) | -30 |
+| Major | Missing `.PHONY` on non-file targets | -10 |
+| Major | Absolute paths | -10 |
+| Major | Directories not using order-only prerequisites | -5 |
+
+### Enforcement
+
+- **Score < 80:** Block commit. List blocking issues.
+- **Score < 90:** Allow commit, warn. List recommendations.
+- User can override with justification.
+
+### Tolerance Thresholds (Research)
+
+<!-- Customize for your domain -->
+
+| Quantity | Tolerance | Rationale |
+|----------|-----------|-----------|
+| Point estimates | [e.g., 1e-6] | [Numerical precision] |
+| Standard errors | [e.g., 1e-4] | [MC variability] |
+| Coverage rates | [e.g., +/- 0.01] | [MC with B reps] |
+
+---
+
+## Task Completion Verification Protocol
+
+**At the end of EVERY task, verify the output works correctly.** This is non-negotiable.
+
+### Make-First Verification
+
+If a Makefile governs the files being modified:
+1. Run `make -n` from the relevant directory to check what is stale
+2. Build stale targets: `make -C code/[subdir] [target]` or `make -C latex`
+3. Check exit code -- non-zero is a hard failure
+4. Then proceed to file-specific checks below
+
+### For LaTeX Manuscript:
+1. Compile with `make -C latex` (preferred). Check for errors
+2. Verify PDF was generated with non-zero size
+3. Check for overfull hbox warnings
+4. Check for undefined citations
+5. Run `/review-tex` to check for hardcoded numbers in prose
+6. Verify all dynamic number `\input{...}` files exist in `output/numbers/`
+
+### For R Scripts:
+1. Prefer `make -C code/[subdir] [target]`; fall back to `Rscript path/to/script.R`
+2. Verify output files (PDF, RDS, CSV) were created with non-zero size
+3. Spot-check estimates for reasonable magnitude
+
+### For Julia Scripts:
+1. Prefer `make -C code/[subdir] [target]`; fall back to `julia path/to/script.jl`
+2. Verify output files (CSV, JLD2) were created with non-zero size
+3. Check file sizes are plausible (not suspiciously small or empty)
+4. If stochastic, verify reproducibility: run twice with same seed, diff outputs
+
+### Verification Checklist:
+```
+[ ] Output file created successfully
+[ ] No compilation/render errors
+[ ] Images/figures display correctly
+[ ] Reported results to user
+```
+
+---
+
+## Session Logging
+
+**Location:** `quality_reports/session_logs/YYYY-MM-DD_description.md`
+**Template:** `templates/session-log.md`
+
+### Three Triggers (all proactive)
+
+1. **Post-Plan Log** -- After plan approval, immediately capture: goal, approach, rationale, key context.
+2. **Incremental Logging** -- Append 1-3 lines whenever: a design decision is made, a problem is solved, the user corrects something, or the approach changes. Do not batch.
+3. **End-of-Session Log** -- When wrapping up: high-level summary, quality scores, open questions, blockers.
+
+### Quality Reports
+
+Generated **only at merge time** -- not at every commit or PR.
+Save to `quality_reports/merges/YYYY-MM-DD_[branch-name].md` using `templates/quality-report.md`.
+
+---
+
+## Command Conventions
+
+Issue one command per shell execution. Do not chain commands with `&&` or `;`. This keeps command execution predictable and matches the permission rules in `.codex/rules/default.rules`.
+
+- **Independent commands** -- issue in parallel when possible (e.g., `git status` and `git diff`)
+- **Dependent commands** -- issue sequentially, waiting for each result before the next (e.g., `git add` then `git commit`)
+
+---
+
+## Replication-First Protocol
+
+**Core principle:** Replicate original results to the dot BEFORE extending.
+
+### Phase 1: Inventory & Baseline
+
+Before writing any code:
+- Read the paper's replication README
+- Inventory replication package: language, data files, scripts, outputs
+- Record gold standard numbers from the paper
+- Store targets in `quality_reports/[project]_replication_targets.md` or as RDS
+
+### Phase 2: Translate & Execute
+
+- Follow code conventions for all coding standards
+- Translate line-by-line initially -- don't "improve" during replication
+- Match original specification exactly
+- Save all intermediate results as RDS or JLD2
+
+### Phase 3: Verify Match
+
+| Type | Tolerance | Rationale |
+|------|-----------|-----------|
+| Integers (N, counts) | Exact match | No reason for any difference |
+| Point estimates | < 0.01 | Rounding in paper display |
+| Standard errors | < 0.05 | Bootstrap/clustering variation |
+| P-values | Same significance level | Exact p may differ slightly |
+| Percentages | < 0.1pp | Display rounding |
+
+**If mismatch:** Do NOT proceed to extensions. Isolate which step introduces the difference.
+
+### Phase 4: Only Then Extend
+
+After replication is verified (all targets PASS), commit and begin extensions.
+
+---
+
+## Workflow Quick Reference
+
+**Model:** Contractor (you direct, Codex orchestrates)
+
+```
+Your instruction -> [PLAN] (if needed) -> Your approval -> [EXECUTE] -> [REPORT] -> Repeat
+```
+
+**Ask the user when:** Design forks, code ambiguity, replication edge cases, scope questions.
+**Just execute when:** Obvious fixes, verification, documentation, plotting, deployment.
