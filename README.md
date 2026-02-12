@@ -353,4 +353,4 @@ MIT License. Use freely for research or any academic purpose.
 
 ## Acknowledgments
 
-This workflow is heavily based on [Pedro H.C. Sant'Anna's Claude Code workflow](https://github.com/pedrohcgs/pedro-claude-code-workflow).
+This workflow is heavily based on [Pedro H.C. Sant'Anna's Claude Code workflow](https://github.com/pedrohcgs/claude-code-my-workflow).
