@@ -295,7 +295,7 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 | `AGENTS.md` (root) | Project root | Core instructions + workflow rules |
 | `code/AGENTS.md` | `code/` | R, Julia, Makefile conventions |
 | `latex/AGENTS.md` | `latex/` | LaTeX conventions |
-| `.codex/config.toml` | `.codex/` | Model, sandbox, approval settings |
+| `.codex/config.toml` | `.codex/` | Optional Codex project overrides for sandbox, approval, and model behavior |
 | `.codex/rules/default.rules` | `.codex/rules/` | Command execution permissions (Starlark) |
 | `.agents/skills/*/SKILL.md` | `.agents/skills/` | 8 reusable skills (same as Claude) |
 
@@ -316,6 +316,8 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 | [jq](https://jqlang.github.io/jq/) | Claude Code hooks (3 of 4 use it) | `brew install jq` (macOS) |
 
 Not all tools are needed — install only what your project uses. Either Claude Code or Codex CLI is the only hard requirement.
+
+By default, this template does not pin an AI model for either tool. Codex CLI uses the default model from your local Codex CLI setup (for example `~/.codex/config.toml` or an explicit `codex --model ...` override), and Claude Code uses the default model configured in your local Claude Code CLI/app session. If you want a repo-specific model, add that pin yourself.
 
 ---
 
