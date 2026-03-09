@@ -1,5 +1,5 @@
 # Codex CLI project configuration
 # Override these defaults in ~/.codex/config.toml for user-level settings
 
-model = "gpt-5.3-codex"
+model = "gpt-5.4"
 model_reasoning_effort = "xhigh"
