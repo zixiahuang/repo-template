@@ -98,9 +98,16 @@ pdflatex -interaction=nonstopmode manuscript.tex
 |---------|-------------|
 | `/commit [msg]` | Stage, commit, PR, merge |
 | `/data-analysis [dataset]` | End-to-end R analysis |
+| `/refactor [file-or-dir]` | Verify-refactor-verify loop |
+| `/verify-outputs [script]` | Checksum outputs, compare to reference |
+| `/compare-branches [b1] [b2]` | Cross-branch output comparison |
+| `/resume` | Recover context after compression/new session |
+| `/setup-makefile [dir]` | Generate Makefile from directory contents |
 | `/review-r [file]` | R code quality review |
 | `/review-julia [file]` | Julia code quality review |
+| `/review-matlab [file]` | MATLAB code quality review |
 | `/review-tex [file]` | LaTeX manuscript review |
+| `/review-makefile [file]` | Makefile conventions review |
 | `/review-comments [path]` | Clean up comments, docstrings, dead code |
 | `/review-pr [PR#]` | Address PR review comments, commit fixes, resolve threads |
 | `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
@@ -163,6 +170,85 @@ When user says "just do it" / "handle it":
 - Auto-commit if score >= 80
 - Still run the full verify-review-fix loop
 - Still present the summary
+
+---
+
+## Refactoring Protocol
+
+### Constraints
+
+- NEVER change solver tolerances, options, or convergence criteria
+- NEVER rename variables in numerical/hot-loop code
+- NEVER change function signatures without explicit approval
+- NEVER remove dead code unless explicitly instructed (flag it in section headers instead)
+- The ONLY acceptable refactoring outcome is identical output
+
+### Verify-Refactor-Verify Loop
+
+1. Run target script, record output checksums (CSV only -- skip binary formats like RDS, .mat, PDF)
+2. Apply style changes per language convention rules
+3. Re-run, compare checksums
+4. If mismatch: revert and report -- do not attempt to fix the mismatch
+
+### Approved Transformations
+
+- Comment style (headers, borders, docstrings)
+- Whitespace and indentation
+- Variable grouping and section organization
+- Adding missing documentation
+- Language-specific style conventions
+
+### Prohibited Transformations (without explicit approval)
+
+- Changing algorithm logic or control flow
+- Renaming function parameters or return values
+- Modifying solver configuration or tolerances
+- Removing or restructuring error handling
+- Changing data types or precision
+
+When in doubt, ask before changing.
+
+---
+
+## Solver Debugging Protocol
+
+When debugging numerical solver failures (MATLAB, Julia, Python):
+
+### Diagnostic Checklist (follow in order)
+
+1. **Dimensions first** -- verify all matrices are conformable, vectors are correct length
+2. **NaN/Inf trace** -- find the first operation that produces NaN; trace backward
+3. **Finite-difference check** -- validate analytic gradients/Hessians before suspecting derivative bugs
+4. **Condition number** -- check key matrices (Jacobian, Hessian) for ill-conditioning
+5. **Boundary check** -- verify variables respect bounds (non-negative shares, probabilities in [0,1])
+6. **Input data** -- confirm data fed to solver contains no NaN/Inf/missing values
+7. **Initial guess** -- check that x0 is feasible (satisfies bounds and constraints)
+
+### Do NOT
+
+- Change tolerances or solver options as a diagnostic step
+- Change the solver algorithm without explicit approval
+- Propose fixes before completing the diagnostic checklist
+- Guess at root causes -- show evidence
+
+Present diagnosis with evidence, then proposed fix. Wait for approval before implementing.
+
+---
+
+## Output Verification Formats
+
+When comparing outputs before and after code changes:
+
+| Format | Checksum-Stable? | How to Compare |
+|--------|-----------------|----------------|
+| CSV/TSV | Yes | MD5 checksum |
+| RDS | No (R-version dependent) | Read and compare values, or convert to CSV |
+| .mat | Partially | Load and compare specific variables |
+| JLD2 | Yes (Julia-version dependent) | MD5 or load-and-compare |
+| PDF/PNG | No (renderer dependent) | Visual diff only |
+| .tex (generated) | Yes | MD5 or text diff |
+
+**Gold standard:** CSV checksums. Use these for refactoring verification. Skip binary formats.
 
 ---
 
@@ -252,10 +338,10 @@ After compression or a new session:
 | Severity | Issue | Deduction |
 |----------|-------|-----------|
 | Critical | pdflatex compilation failure | -100 |
+| Critical | Typo in equation | -25 |
 | Critical | Undefined citation | -15 |
-| Critical | Overfull hbox > 10pt | -10 |
-| Critical | Typo in equation | -10 |
 | Critical | Hardcoded result (macro exists but unused) | -15 |
+| Critical | Overfull hbox > 10pt | -10 |
 | Major | Missing bibliography entries | -5 |
 | Major | Likely computed result with no macro | -5 |
 | Major | output/numbers/ file missing from Makefile dependencies | -5 |
@@ -266,7 +352,8 @@ After compression or a new session:
 | Severity | Issue | Deduction |
 |----------|-------|-----------|
 | Critical | Syntax errors | -100 |
-| Critical | Domain-specific bugs | -30 |
+| Critical | Domain-specific bugs (wrong estimand, incorrect formula) | -30 |
+| Critical | Numerical errors (division by zero, unguarded NaN propagation) | -25 |
 | Critical | Hardcoded absolute paths | -20 |
 | Major | Missing set.seed() | -10 |
 | Major | Missing figure generation | -5 |
@@ -276,7 +363,8 @@ After compression or a new session:
 | Severity | Issue | Deduction |
 |----------|-------|-----------|
 | Critical | Runtime errors | -100 |
-| Critical | Domain-specific bugs | -30 |
+| Critical | Domain-specific bugs (wrong estimand, incorrect formula) | -30 |
+| Critical | Numerical errors (NaN propagation, catastrophic cancellation, wrong precision) | -25 |
 | Critical | Hardcoded absolute paths | -20 |
 | Major | Type instability in hot loops | -15 |
 | Major | Missing `Random.seed!()` | -10 |
@@ -284,6 +372,24 @@ After compression or a new session:
 | Major | Missing persistence (no CSV/JLD2 export) | -5 |
 | Minor | Unfused broadcasts (`.+` instead of `@.`) | -2 |
 | Minor | Globals captured in loops without `let` | -2 |
+
+### MATLAB Scripts (.m)
+
+| Severity | Issue | Deduction |
+|----------|-------|-----------|
+| Critical | Runtime errors | -100 |
+| Critical | Domain-specific bugs (wrong objective, incorrect moment conditions) | -30 |
+| Critical | Asymmetric Hessian | -25 |
+| Critical | Gradient/Hessian sign errors | -25 |
+| Critical | Gradient/Hessian dimension mismatch | -25 |
+| Critical | Hardcoded absolute paths | -20 |
+| Critical | Unchecked solver exitflag | -20 |
+| Critical | Index consistency errors (off-by-one, bounds/parameter mismatch) | -20 |
+| Major | Missing NaN/Inf guards | -10 |
+| Major | Missing `rng()` (if stochastic) | -10 |
+| Major | Missing output persistence | -5 |
+| Minor | `i`/`j` as loop variables | -2 |
+| Minor | Missing semicolons (unsuppressed output) | -1 |
 
 ### Makefile
 

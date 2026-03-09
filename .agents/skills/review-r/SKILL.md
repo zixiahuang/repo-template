@@ -146,10 +146,7 @@ Save report to `quality_reports/[script_name]_r_review.md`:
 
 ## Summary
 - **Total issues:** N
-- **Critical:** N (blocks correctness or reproducibility)
-- **High:** N (blocks professional quality)
-- **Medium:** N (improvement recommended)
-- **Low:** N (style / polish)
+- **Critical:** N | **High:** N | **Medium:** N | **Low:** N
 
 ## Issues
 

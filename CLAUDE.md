@@ -94,9 +94,16 @@ pdflatex -interaction=nonstopmode manuscript.tex
 |---------|-------------|
 | `/commit [msg]` | Stage, commit, PR, merge |
 | `/data-analysis [dataset]` | End-to-end R analysis |
+| `/refactor [file-or-dir]` | Verify-refactor-verify loop |
+| `/verify-outputs [script]` | Checksum outputs, compare to reference |
+| `/compare-branches [b1] [b2]` | Cross-branch output comparison |
+| `/resume` | Recover context after compression/new session |
+| `/setup-makefile [dir]` | Generate Makefile from directory contents |
 | `/review-r [file]` | R code quality review |
 | `/review-julia [file]` | Julia code quality review |
+| `/review-matlab [file]` | MATLAB code quality review |
 | `/review-tex [file]` | LaTeX manuscript review |
+| `/review-makefile [file]` | Makefile conventions review |
 | `/review-comments [path]` | Clean up comments, docstrings, dead code |
 | `/review-pr [PR#]` | Address PR review comments, commit fixes, resolve threads |
 | `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
