@@ -218,6 +218,97 @@ Prefer JLD2 for Julia-native objects. Use CSV for model output. When saving para
 
 ---
 
+## MATLAB Code Standards
+
+**Standard:** Senior Principal Computational Scientist + PhD researcher quality
+
+### 1. Reproducibility
+
+- `rng()` called ONCE at top if stochastic operations are present (never inside loops/functions)
+- All paths relative to repository root
+- Path construction uses `filesep` or `fullfile()` for cross-platform compatibility
+- No hardcoded absolute paths (e.g., `/Users/...`, `C:\Users\...`)
+- Rely on the Makefile to make directories (when Makefiles exist)
+
+### 2. Function Design
+
+- Consistent naming convention (`snake_case` matching existing codebase)
+- Comment-block docstring immediately after function signature:
+  ```matlab
+  function [obj, grad, H] = objective_fn(x, data, Params)
+  % OBJECTIVE_FN  Compute objective, gradient, and Hessian.
+  %
+  %   [obj, grad, H] = objective_fn(x, data, Params)
+  %
+  %   Inputs:
+  %     x      - Parameter vector (N x 1)
+  %     data   - Structure with fields: ...
+  %     Params - Configuration structure with fields: ...
+  %
+  %   Outputs:
+  %     obj  - Scalar objective value
+  %     grad - Gradient vector (N x 1)
+  %     H    - Hessian matrix (N x N)
+  ```
+- Use `Params` struct for configuration and tuning values (no magic numbers)
+- Input validation via `assert()` for critical dimensions
+
+### 3. Domain Correctness
+
+- Verify objective function implementations match paper formulas (`latex/manuscript.tex`)
+- Check known package/solver bugs (document below in Common Pitfalls)
+
+### 4. Solver Configuration
+
+Projects using optimization should follow a dual-solver pattern (e.g., KNITRO + fmincon) controlled by a configuration flag. Key requirements:
+- Option file paths constructed with `filesep` or `fullfile()`
+- Hessian callback matches the wrapper signature
+- Both solver paths should produce consistent results
+- Always check `exitflag` after solver call
+
+### 5. Output Paths
+
+All code outputs go to canonical subdirectories under `output/`:
+
+```matlab
+writetable(results, fullfile(Params.datadir, 'model', 'results.csv'));
+writematrix(data, fullfile(Params.datadir, 'model', 'output.csv'));
+save(fullfile(Params.datadir, 'matlab', 'results.mat'), 'results', 'params');
+```
+
+### 6. Common Pitfalls
+
+| Pitfall | Impact | Prevention |
+|---------|--------|------------|
+| Hardcoded absolute paths | Breaks on other machines | Use relative paths with `filesep` |
+| Unchecked solver `exitflag` | **Silent convergence failure (Critical, -20)** | Always check `exitflag > 0` |
+| Missing NaN/Inf guards | Solver crashes or wrong results | Check before and after optimization |
+| Inconsistent index trimming | Wrong data alignment | Trim all parallel arrays identically |
+| `i`/`j` as loop variables | Shadows complex unit | Use `ii`, `jj`, `kk` or descriptive names |
+| Asymmetric Hessian | **Silently wrong results (Critical, -25)** | Symmetrize: `H = (H + H') / 2` |
+| Missing semicolons | Unwanted console output | End assignment lines with `;` |
+
+### 7. Line Length
+
+**Standard:** Keep lines <= 120 characters. Mathematical formulas may exceed 120 chars if breaking the line would harm readability, an inline comment explains the operation, and the line is in a numerically intensive section.
+
+### 8. Code Quality Checklist
+
+```
+[ ] rng() once at top (if stochastic)
+[ ] All paths relative with filesep/fullfile()
+[ ] Functions documented (comment-block docstrings)
+[ ] Solver exitflag checked after every optimization call
+[ ] NaN/Inf guards on data input and solver output
+[ ] Hessian symmetry verified
+[ ] Output files saved (writetable/writematrix/save)
+[ ] Comments explain WHY not WHAT
+[ ] No magic numbers (use Params struct)
+[ ] Semicolons on all assignment lines
+```
+
+---
+
 ## Makefile Conventions
 
 ### Structure
@@ -271,6 +362,7 @@ When a single script produces multiple outputs, declare one primary target with 
 
 - R scripts: `Rscript $<`
 - Julia scripts: `julia $<`
+- MATLAB scripts: `matlab -batch "run('$<')"`
 - Always use `$<` (first prerequisite) and `$@` (target) automatic variables
 - Never use absolute paths
 
@@ -297,4 +389,4 @@ The `code/Makefile` in turn delegates to sub-Makefiles in each task-group direct
 ### Validation
 
 - `make -n` (dry-run) must produce a valid plan
-- Every `.R` and `.jl` file under `code/` should appear as a prerequisite in some Makefile target -- orphaned scripts are a warning sign
+- Every `.R`, `.jl`, and `.m` file under `code/` should appear as a prerequisite in some Makefile target -- orphaned scripts are a warning sign

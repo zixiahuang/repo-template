@@ -2,6 +2,7 @@
 paths:
   - "latex/**/*.tex"
   - "**/*.jl"
+  - "**/*.m"
   - "code/**"
   - "code/**/Makefile"
 ---
@@ -19,11 +20,11 @@ paths:
 | Severity | Issue | Deduction |
 |----------|-------|-----------|
 | Critical | pdflatex compilation failure | -100 |
+| Critical | Typo in equation | -25 |
+| Critical | Hardcoded result (macro exists but unused) | -15 |
 | Critical | Undefined citation | -15 |
 | Critical | Overfull hbox > 10pt | -10 |
-| Critical | Typo in equation | -10 |
 | Major | Missing bibliography entries | -5 |
-| Critical | Hardcoded result (macro exists but unused) | -15 |
 | Major | Likely computed result with no macro | -5 |
 | Major | output/numbers/ file missing from Makefile dependencies | -5 |
 | Minor | Long lines (>100 chars) | -1 (EXCEPT documented math formulas) |
@@ -33,7 +34,8 @@ paths:
 | Severity | Issue | Deduction |
 |----------|-------|-----------|
 | Critical | Syntax errors | -100 |
-| Critical | Domain-specific bugs | -30 |
+| Critical | Domain-specific bugs (wrong estimand, incorrect formula) | -30 |
+| Critical | Numerical errors (division by zero, unguarded NaN propagation) | -25 |
 | Critical | Hardcoded absolute paths | -20 |
 | Major | Missing set.seed() | -10 |
 | Major | Missing figure generation | -5 |
@@ -43,7 +45,8 @@ paths:
 | Severity | Issue | Deduction |
 |----------|-------|-----------|
 | Critical | Runtime errors | -100 |
-| Critical | Domain-specific bugs | -30 |
+| Critical | Domain-specific bugs (wrong estimand, incorrect formula) | -30 |
+| Critical | Numerical errors (NaN propagation, catastrophic cancellation, wrong precision) | -25 |
 | Critical | Hardcoded absolute paths | -20 |
 | Major | Type instability in hot loops | -15 |
 | Major | Missing `Random.seed!()` | -10 |
@@ -51,6 +54,24 @@ paths:
 | Major | Missing persistence (no CSV/JLD2 export) | -5 |
 | Minor | Unfused broadcasts (`.+` instead of `@.`) | -2 |
 | Minor | Globals captured in loops without `let` | -2 |
+
+## MATLAB Scripts (.m)
+
+| Severity | Issue | Deduction |
+|----------|-------|-----------|
+| Critical | Runtime errors | -100 |
+| Critical | Domain-specific bugs (wrong objective, incorrect moment conditions) | -30 |
+| Critical | Asymmetric Hessian | -25 |
+| Critical | Gradient/Hessian sign errors | -25 |
+| Critical | Gradient/Hessian dimension mismatch | -25 |
+| Critical | Hardcoded absolute paths | -20 |
+| Critical | Unchecked solver exitflag | -20 |
+| Critical | Index consistency errors (off-by-one, bounds/parameter mismatch) | -20 |
+| Major | Missing NaN/Inf guards | -10 |
+| Major | Missing `rng()` (if stochastic) | -10 |
+| Major | Missing output persistence | -5 |
+| Minor | `i`/`j` as loop variables | -2 |
+| Minor | Missing semicolons (unsuppressed output) | -1 |
 
 ## Makefile
 

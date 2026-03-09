@@ -230,6 +230,8 @@ Focused agents each check one dimension:
 |-------|---------------|
 | `r-reviewer` | R code quality, reproducibility, domain correctness |
 | `julia-reviewer` | Julia code quality, type stability, performance |
+| `matlab-reviewer` | MATLAB code quality, solver configuration, derivative correctness |
+| `makefile-reviewer` | Makefile conventions, dependency correctness, script coverage |
 | `verifier` | End-to-end build verification, orphaned script detection |
 
 The verifier runs an **orphaned script check**: every `.R` and `.jl` file under `code/` must appear as a prerequisite in some Makefile. Scripts with no Makefile target get flagged.
@@ -256,7 +258,9 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 |-------|-------------|
 | `r-reviewer` | R code quality, reproducibility, and domain correctness |
 | `julia-reviewer` | Julia code quality, type stability, and performance |
+| `matlab-reviewer` | MATLAB code quality, solver configuration, derivative correctness |
 | `tex-reviewer` | LaTeX manuscript quality, hardcoded numbers, citation consistency |
+| `makefile-reviewer` | Makefile conventions, dependency correctness, script coverage |
 | `verifier` | End-to-end build verification with orphaned script check |
 
 ### Key Skills (`.claude/skills/`)
@@ -265,10 +269,17 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 |-------|-------------|
 | `/commit` | Stage, commit, PR, merge (with `make -n` staleness warning) |
 | `/data-analysis` | End-to-end R analysis workflow |
+| `/refactor [file-or-dir]` | Verify-refactor-verify loop for safe style changes |
+| `/verify-outputs [script]` | Checksum outputs, compare to reference |
+| `/compare-branches [b1] [b2]` | Cross-branch output comparison via worktrees |
+| `/resume` | Recover context after compression/new session |
+| `/setup-makefile [dir]` | Generate Makefile from directory contents |
 | `/review-pr [PR#]` | Address PR review comments, commit fixes, resolve threads |
 | `/review-r [file]` | R code quality review via r-reviewer agent |
 | `/review-julia [file]` | Julia code quality review via julia-reviewer agent |
+| `/review-matlab [file]` | MATLAB code quality review via matlab-reviewer agent |
 | `/review-tex [file]` | LaTeX manuscript review via tex-reviewer agent |
+| `/review-makefile [file]` | Makefile conventions review via makefile-reviewer agent |
 | `/review-comments [path]` | Clean up comments, docstrings, dead code |
 | `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
 
@@ -279,7 +290,11 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 | `makefile-conventions` | Standard Make patterns: `.PHONY`, order-only prereqs, pattern rules, joint production |
 | `r-code-conventions` | R coding standards, Makefile-based directory creation |
 | `julia-code-conventions` | Julia coding standards, Makefile-based directory creation |
-| `quality-gates` | 80/90/95 scoring for R, Julia, Makefiles, and LaTeX |
+| `matlab-code-conventions` | MATLAB coding standards, solver configuration, derivative correctness |
+| `refactoring-protocol` | Verify-refactor-verify loop, prohibited/approved transformations |
+| `solver-debugging-protocol` | Systematic diagnostic checklist for numerical solver failures |
+| `verification-formats` | Which output formats are checksum-stable and how to compare each |
+| `quality-gates` | 80/90/95 scoring for R, Julia, MATLAB, Makefiles, and LaTeX |
 | `verification-protocol` | Make-first verification, then file-specific checks |
 | `orchestrator-protocol` | Contractor mode: implement, verify via Make, review, fix, score |
 | `orchestrator-research` | Simplified loop for R/Julia scripts |
@@ -297,7 +312,7 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 | `latex/AGENTS.md` | `latex/` | LaTeX conventions |
 | `.codex/config.toml` | `.codex/` | Model, sandbox, approval settings |
 | `.codex/rules/default.rules` | `.codex/rules/` | Command execution permissions (Starlark) |
-| `.agents/skills/*/SKILL.md` | `.agents/skills/` | 8 reusable skills (same as Claude) |
+| `.agents/skills/*/SKILL.md` | `.agents/skills/` | 15 reusable skills (same as Claude) |
 
 </details>
 
