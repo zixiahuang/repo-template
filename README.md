@@ -231,10 +231,18 @@ Focused agents each check one dimension:
 | `r-reviewer` | R code quality, reproducibility, domain correctness |
 | `julia-reviewer` | Julia code quality, type stability, performance |
 | `matlab-reviewer` | MATLAB code quality, solver configuration, derivative correctness |
+| `domain-reviewer` | Substantive manuscript/slide review: identification, derivations, citations, code-theory alignment |
+| `proofreader` | Grammar, typos, overflow risks, and consistency for academic documents |
 | `makefile-reviewer` | Makefile conventions, dependency correctness, script coverage |
 | `verifier` | End-to-end build verification, orphaned script detection |
 
 The verifier runs an **orphaned script check**: every `.R` and `.jl` file under `code/` must appear as a prerequisite in some Makefile. Scripts with no Makefile target get flagged.
+
+For manuscript or slide tasks, the orchestrator can also run **opt-in review passes** after the review-fix loop completes:
+- `domain-reviewer` for substantive identification and citation checks
+- `proofreader` for grammar, overflow, and consistency checks
+
+These run once on the final state and produce reports only — fixes require user review.
 
 ### Quality Gates
 
@@ -259,6 +267,8 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 | `r-reviewer` | R code quality, reproducibility, and domain correctness |
 | `julia-reviewer` | Julia code quality, type stability, and performance |
 | `matlab-reviewer` | MATLAB code quality, solver configuration, derivative correctness |
+| `domain-reviewer` | Substantive review for manuscripts, slides, and teaching materials |
+| `proofreader` | Academic proofreading for manuscripts, slides, and notes |
 | `tex-reviewer` | LaTeX manuscript quality, hardcoded numbers, citation consistency |
 | `makefile-reviewer` | Makefile conventions, dependency correctness, script coverage |
 | `verifier` | End-to-end build verification with orphaned script check |
@@ -280,6 +290,8 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 | `/review-matlab [file]` | MATLAB code quality review via matlab-reviewer agent |
 | `/review-tex [file]` | LaTeX manuscript review via tex-reviewer agent |
 | `/review-makefile [file]` | Makefile conventions review via makefile-reviewer agent |
+| `/review-domain [file]` | Opt-in substantive domain review via domain-reviewer agent |
+| `/proofread [file]` | Opt-in proofreading review via proofreader agent |
 | `/review-comments [path]` | Clean up comments, docstrings, dead code |
 | `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
 
@@ -312,7 +324,7 @@ Rubrics cover R scripts, Julia scripts, Makefiles, and LaTeX manuscripts. See `.
 | `latex/AGENTS.md` | `latex/` | LaTeX conventions |
 | `.codex/config.toml` | `.codex/` | Optional Codex project overrides for sandbox, approval, and model behavior |
 | `.codex/rules/default.rules` | `.codex/rules/` | Command execution permissions (Starlark) |
-| `.agents/skills/*/SKILL.md` | `.agents/skills/` | 15 reusable skills (same as Claude) |
+| `.agents/skills/*/SKILL.md` | `.agents/skills/` | 17 reusable skills (same as Claude) |
 
 </details>
 
