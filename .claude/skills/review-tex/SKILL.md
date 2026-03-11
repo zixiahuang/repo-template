@@ -19,8 +19,8 @@ Run the comprehensive LaTeX review protocol.
 2. **For each file, launch the `tex-reviewer` agent** with instructions to:
    - Follow the full protocol in the agent instructions
    - Check for hardcoded numbers that should use `\input` from `output/numbers/`
-   - Check citation consistency against `references/references.bib`
-   - Save report to `quality_reports/[filename]_tex_review.md`
+   - Check citation consistency against `latex/references/references.bib`
+   - Save report to `quality_reports/[FILENAME_WITHOUT_EXT]_tex_review.md`
 
 3. **After all reviews complete**, present a summary:
    - Total issues found per file
