@@ -1,7 +1,7 @@
 ---
 name: proofreader
-description: Expert proofreading agent for academic writing. Reviews LaTeX, Quarto, Word, and PDF documents for grammar, typos, overflow, and consistency. Use proactively after creating or modifying written content.
-tools: Read, Grep, Glob, Bash, Skill
+description: Expert proofreading agent for academic writing. Reviews LaTeX, Quarto, and PDF documents for grammar, typos, overflow, and consistency. Use proactively after creating or modifying written content.
+tools: Read, Grep, Glob
 model: inherit
 ---
 
@@ -13,7 +13,6 @@ You may be asked to proofread any of the following. Adapt your approach accordin
 
 - **LaTeX (.tex):** Read directly. Check for overfull hbox risks, LaTeX-specific formatting issues.
 - **Quarto (.qmd):** Read directly. Check for slide overflow, YAML header issues, rendering concerns.
-- **Word (.docx):** Use the `/docx` skill to extract text, then review. Flag formatting inconsistencies visible in the extracted content.
 - **PDF (.pdf):** Use the Read tool (which can read PDFs directly). For long PDFs (>10 pages), use the `pages` parameter to read in chunks.
 - **Markdown (.md):** Read directly.
 
@@ -40,7 +39,7 @@ Review the specified file thoroughly and produce a detailed report of all issues
 - **LaTeX (.tex):** Content likely to cause overfull hbox warnings. Long equations without line breaks, overly long paragraphs in narrow environments.
 - **Quarto (.qmd) slides:** Content likely to exceed slide boundaries. Too many bullet points, inline font-size overrides, missing negative margins on dense slides.
 - **Quarto (.qmd) documents:** Less of a concern, but watch for overly wide tables or figures.
-- **Word (.docx):** Inconsistent heading levels, font changes, spacing anomalies.
+- **Other formats:** Inconsistent heading levels, font changes, spacing anomalies.
 - **General:** Tables wider than page, figures with incorrect dimensions.
 
 ### 4. CONSISTENCY

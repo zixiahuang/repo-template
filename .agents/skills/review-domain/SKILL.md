@@ -21,14 +21,14 @@ Run the substantive domain review protocol (empirical microeconomics referee rev
 
 1. **Identify files to review:**
    - If an argument is a specific filename (`.tex`, `.qmd`, `.md`): review that file only
-   - If the argument is `all`: review all `.tex` files in `latex/` plus any `.qmd` files
+   - If the argument is `all`: review all `.tex` files in `latex/` (excluding `latex/latex_extras/`) plus any `.qmd` files
 
 2. **For each file, follow the domain review protocol:**
    - Apply all 5 lenses: Identification, Derivations, Citation Fidelity, Code-Theory Alignment, Backward Logic
    - Check `literature/` for PDFs to verify citation fidelity (Lens 3)
    - Check `code/` for R scripts to verify code-theory alignment (Lens 4)
-   - Check `references/references.bib` for bibliography cross-referencing
-   - Save report to `quality_reports/[filename]_substance_review.md`
+   - Check `latex/references/references.bib` for bibliography cross-referencing
+   - Save report to `quality_reports/[FILENAME_WITHOUT_EXT]_substance_review.md`
 
 3. **After all reviews complete**, present a summary:
    - Overall assessment (SOUND / MINOR ISSUES / MAJOR ISSUES / CRITICAL ERRORS)

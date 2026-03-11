@@ -146,12 +146,6 @@ Plan approved -> orchestrator activates
   |
   Step 3: REVIEW -- Run appropriate review skill (/review-r, /review-julia, /review-tex)
   |
-  Step 3b: OPTIONAL REVIEWS -- If the approved plan requests them:
-  |         * Domain substance review -> run domain-reviewer agent
-  |         * Proofreading -> run proofreader agent
-  |         These run after file-type reviews and produce separate reports.
-  |         Skip this step if the plan does not request optional reviews.
-  |
   Step 4: FIX -- Apply fixes (critical -> major -> minor)
   |
   Step 5: RE-VERIFY -- Confirm fixes are clean
@@ -159,9 +153,18 @@ Plan approved -> orchestrator activates
   Step 6: SCORE -- Apply quality-gates rubric
   |
   └── Score >= threshold?
-        YES -> Present summary to user
+        YES -> Continue to Step 7
         NO  -> Loop back to Step 3 (max 5 rounds)
-              After max rounds -> present with remaining issues
+              After max rounds -> continue to Step 7 with remaining issues
+  |
+  Step 7: OPTIONAL REVIEWS -- If the approved plan requests them:
+  |         * Domain substance review -> run domain-reviewer agent
+  |         * Proofreading -> run proofreader agent
+  |         These run once on the final state, after the review-fix loop.
+  |         They produce reports only -- fixes require user review.
+  |         Skip this step if the plan does not request optional reviews.
+  |
+  Step 8: Present summary to user (including optional review reports)
 ```
 
 ### Limits

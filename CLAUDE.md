@@ -119,3 +119,11 @@ pdflatex -interaction=nonstopmode manuscript.tex
 | Manuscript | `latex/manuscript.tex` | Template | Paper skeleton with standard sections |
 | Slides | `latex/slides.tex` | Template | Presentation template |
 | Code pipeline | `code/` | Template | Sub-Makefiles to be added per project |
+
+---
+
+## Plan-First Notes
+
+For manuscript or slide tasks, ask during planning whether to include these optional review passes:
+- `domain-reviewer` for substantive domain review (identification, derivations, citations, code-theory alignment)
+- `proofreader` for grammar, typos, overflow, and consistency
