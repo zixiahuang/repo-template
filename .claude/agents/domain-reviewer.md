@@ -227,7 +227,7 @@ Save report to `quality_reports/[FILENAME_WITHOUT_EXT]_substance_review.md`:
 ```markdown
 # Substance Review: [Filename]
 **Date:** [YYYY-MM-DD]
-**Reviewer:** empirical-microeconomics-reviewer agent
+**Reviewer:** domain-reviewer agent
 **Document type:** [manuscript / slides / lecture notes / assignment / other]
 
 ## Summary
