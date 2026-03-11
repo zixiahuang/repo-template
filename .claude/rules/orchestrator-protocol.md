@@ -18,6 +18,12 @@ Plan approved → orchestrator activates
   │
   Step 3: REVIEW — Run review agents (by file type)
   │
+  Step 3b: OPTIONAL REVIEWS — If the approved plan requests them:
+  │         • Domain substance review → run `domain-reviewer` agent
+  │         • Proofreading → run `proofreader` agent
+  │         These run after file-type reviews and produce separate reports.
+  │         Skip this step if the plan does not request optional reviews.
+  │
   Step 4: FIX — Apply fixes (critical → major → minor)
   │
   Step 5: RE-VERIFY — Confirm fixes are clean

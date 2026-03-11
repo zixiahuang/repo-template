@@ -109,6 +109,8 @@ pdflatex -interaction=nonstopmode manuscript.tex
 | `/review-tex [file]` | LaTeX manuscript review |
 | `/review-makefile [file]` | Makefile conventions review |
 | `/review-comments [path]` | Clean up comments, docstrings, dead code |
+| `/review-domain [file]` | Substantive domain review (identification, citations, code-theory) -- opt-in |
+| `/proofread [file]` | Grammar, typos, overflow, consistency check -- opt-in |
 | `/review-pr [PR#]` | Address PR review comments, commit fixes, resolve threads |
 | `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
 
@@ -143,6 +145,12 @@ Plan approved -> orchestrator activates
   |         If verification fails -> fix -> re-verify
   |
   Step 3: REVIEW -- Run appropriate review skill (/review-r, /review-julia, /review-tex)
+  |
+  Step 3b: OPTIONAL REVIEWS -- If the approved plan requests them:
+  |         * Domain substance review -> run domain-reviewer agent
+  |         * Proofreading -> run proofreader agent
+  |         These run after file-type reviews and produce separate reports.
+  |         Skip this step if the plan does not request optional reviews.
   |
   Step 4: FIX -- Apply fixes (critical -> major -> minor)
   |
@@ -303,8 +311,12 @@ Plan approved -> orchestrator activates
 2. **Check MEMORY.md** for `[LEARN]` entries relevant to this task
 3. **Draft the plan** -- what changes, which files, in what order
 4. **Save to disk** -- write to `quality_reports/plans/YYYY-MM-DD_short-description.md`
-5. **Present to user** -- wait for approval
-6. **Implement via orchestrator** after approval
+5. **Manuscript review opt-in** -- if the task touches manuscript or slides (`latex/`), ask:
+   - "Include domain substance review?" (runs `domain-reviewer` agent)
+   - "Include proofreading?" (runs `proofreader` agent)
+   - Record the answers in the saved plan under an `## Optional Reviews` section
+6. **Present to user** -- wait for approval
+7. **Implement via orchestrator** after approval
 
 ### Plans on Disk
 

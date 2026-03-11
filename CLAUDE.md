@@ -105,6 +105,8 @@ pdflatex -interaction=nonstopmode manuscript.tex
 | `/review-tex [file]` | LaTeX manuscript review |
 | `/review-makefile [file]` | Makefile conventions review |
 | `/review-comments [path]` | Clean up comments, docstrings, dead code |
+| `/review-domain [file]` | Substantive domain review (identification, citations, code-theory) — opt-in |
+| `/proofread [file]` | Grammar, typos, overflow, consistency check — opt-in |
 | `/review-pr [PR#]` | Address PR review comments, commit fixes, resolve threads |
 | `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
 
