@@ -24,7 +24,7 @@ Run the comprehensive LaTeX review protocol focused on hardcoded numeric results
    - If the argument is `all`: review all `.tex` files in `latex/`
 
 2. **For each file, follow the review protocol below.**
-   - Save report to `quality_reports/[filename]_tex_review.md`
+   - Save report to `quality_reports/[FILENAME_WITHOUT_EXT]_tex_review.md`
 
 3. **After all reviews complete**, present a summary:
    - Total issues found per file
@@ -111,7 +111,7 @@ If `output/numbers/` does not exist AND `code/` has no scripts, report:
 ### Report Format
 
 ```markdown
-# Hardcoded Number Review: [filename].tex
+# Hardcoded Number Review: [FILENAME_WITHOUT_EXT].tex
 **Date:** [YYYY-MM-DD]
 **Reviewer:** review-tex skill
 
