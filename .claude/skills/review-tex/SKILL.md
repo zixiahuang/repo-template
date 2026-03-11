@@ -1,6 +1,6 @@
 ---
 name: review-tex
-description: Run the LaTeX review protocol on manuscript and slides. Checks for hardcoded numbers, citation consistency, and compilation issues. Produces a report without editing files.
+description: Run the LaTeX review protocol on manuscript and slides. Checks for hardcoded numbers, citation consistency, and compilation issues. Auto-fixes unambiguous hardcoded values; produces a report for ambiguous cases.
 disable-model-invocation: true
 argument-hint: "[filename or 'all']"
 allowed-tools: ["Read", "Grep", "Glob", "Write", "Task"]
@@ -27,5 +27,5 @@ Run the comprehensive LaTeX review protocol.
    - Breakdown by severity (Critical / High / Medium / Low)
    - Top 3 most critical issues
 
-4. **IMPORTANT: Do NOT edit any LaTeX source files.**
-   Only produce reports. Fixes are applied after user review.
+4. **IMPORTANT: Do NOT edit any LaTeX source files unless auto-fixing (see Phase 2 in the agent instructions).**
+   For ambiguous cases, only produce reports. Fixes are applied after user review.
