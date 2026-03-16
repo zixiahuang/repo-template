@@ -42,7 +42,7 @@ methods and reproducible research workflows.
 
 - `set.seed()` called once at the top
 - Packages loaded at the top via `library()`
-- Paths relative to the repository root
+- Paths relative to the script working directory (typically `code/<task_group>/`)
 - Scripts do not call `dir.create()`
 - No hardcoded absolute paths
 - Script can run cleanly via `Rscript`

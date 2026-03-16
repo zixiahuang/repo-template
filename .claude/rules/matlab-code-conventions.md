@@ -13,8 +13,9 @@ paths:
 ## 1. Reproducibility
 
 - `rng()` called ONCE at top if stochastic operations are present (never inside loops/functions)
-- All paths relative to repository root
+- All paths relative to the script working directory (usually `code/[task_group]/`)
 - Path construction uses `filesep` or `fullfile()` for cross-platform compatibility
+- Use forward slashes in any literal filepath; never write Windows-style backslashes
 - No hardcoded absolute paths (e.g., `/Users/...`, `C:\Users\...`)
 - Rely on the Makefile to make directories (when Makefiles exist)
 
@@ -76,20 +77,27 @@ Key requirements:
 
 ## 5. Output Paths
 
-All code outputs go to canonical subdirectories under `output/`:
+Task-group scripts usually run from `code/[task_group]/`, so paths are
+relative to that working directory. In the standard layout, define
+`output_root` once and write into the canonical subdirectories under the
+repo-root `output/` directory:
 
 ```matlab
+output_root = fullfile("..", "..", "output");
+
 % Tables / CSV
-writetable(results, fullfile("output", "tables", "results.csv"));
+writetable(results, fullfile(output_root, "tables", "results.csv"));
 
 % Matrix data
-writematrix(data, fullfile("output", "tables", "output.csv"));
+writematrix(data, fullfile(output_root, "tables", "output.csv"));
 
 % MATLAB binary
-save(fullfile("output", "tables", "results.mat"), "results", "params");
+save(fullfile(output_root, "tables", "results.mat"), "results", "params");
 ```
 
-Projects with a `Params` struct may wrap these paths (e.g., `Params.outputdir` instead of `"output"`), but the canonical subdirectories (`tables/`, `figures/`, `numbers/`) remain the same.
+Projects with a `Params` struct may wrap these paths (e.g., `Params.outputdir`
+instead of `output_root`), but the canonical subdirectories (`tables/`,
+`figures/`, `numbers/`) remain the same.
 
 ## 6. Common Pitfalls
 

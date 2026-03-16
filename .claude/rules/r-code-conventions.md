@@ -14,7 +14,8 @@ paths:
 
 - `set.seed()` called ONCE at top (YYYYMMDD format)
 - All packages loaded at top via `library()` (not `require()`)
-- All paths relative to repository root
+- All paths relative to the script working directory (usually `code/[task_group]/`)
+- Use forward slashes in any literal filepath; never write Windows-style backslashes
 - Rely on the Makefile to make directories
 
 ## 2. Function Design
@@ -87,24 +88,30 @@ ggsave(filepath, width = 8, height = 8, bg = "transparent")
 
 ## 5. Output Paths
 
-All code outputs go to canonical subdirectories under `output/`:
+Task-group scripts usually run from `code/[task_group]/`, so paths are
+relative to that working directory. In the standard layout, define
+`output_root` once and write into the canonical subdirectories under the
+repo-root `output/` directory:
 
 ```r
+output_root = file.path("..", "..", "output")
+
 # Figures
-ggsave(file.path("output", "figures", "my_plot.pdf"), width = 8, height = 8, bg = "transparent")
+ggsave(file.path(output_root, "figures", "my_plot.pdf"), width = 8, height = 8, bg = "transparent")
 
 # Tables / RDS
-saveRDS(result, file.path("output", "tables", "my_results.rds"))
+saveRDS(result, file.path(output_root, "tables", "my_results.rds"))
 
 # Inline numbers for manuscript (\newcommand .txt files)
 writeLines("\\newcommand{\\myEstimate}{2.31}",
-           file.path("output", "numbers", "my_estimate.txt"))
+           file.path(output_root, "numbers", "my_estimate.txt"))
 ```
 
 **Heavy computations saved as RDS; slide rendering loads pre-computed data.**
 
 ```r
-saveRDS(result, file.path("output", "tables", "descriptive_name.rds"))
+output_root = file.path("..", "..", "output")
+saveRDS(result, file.path(output_root, "tables", "descriptive_name.rds"))
 ```
 
 ## 6. Common Pitfalls

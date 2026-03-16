@@ -18,14 +18,20 @@ For each script, scan for write calls:
 - Stata: `save`, `export delimited`, `putexcel`, `esttab`, `file write`
 - MATLAB: `writetable`, `writematrix`, `save`, `saveas`
 
-Concrete patterns to match include:
+Concrete patterns to match include. In the standard `code/<task_group>/`
+layout, scripts usually define a working-directory-relative output root that
+points to the repo-root `output/` directory:
 
-- R: `write.csv(df, file.path("output", "tables", "results.csv"))`
-- Julia: `CSV.write(joinpath("output", "tables", "results.csv"), df)`
-- Stata: `save "output/tables/results.dta", replace`
-- Stata: `export delimited using "output/tables/results.csv", replace`
-- Stata: `file open fh using "output/numbers/estimate.txt", write text replace`
-- MATLAB: `writetable(tbl, fullfile("output", "tables", "results.csv"))`
+- R: `output_root = file.path("..", "..", "output")`
+- R: `write.csv(df, file.path(output_root, "tables", "results.csv"))`
+- Julia: `output_root = joinpath("..", "..", "output")`
+- Julia: `CSV.write(joinpath(output_root, "tables", "results.csv"), df)`
+- Stata: `local output_root "../../output"`
+- Stata: `save "`output_root'/tables/results.dta", replace`
+- Stata: `export delimited using "`output_root'/tables/results.csv", replace`
+- Stata: `file open fh using "`output_root'/numbers/estimate.txt", write text replace`
+- MATLAB: `output_root = fullfile("..", "..", "output");`
+- MATLAB: `writetable(tbl, fullfile(output_root, "tables", "results.csv"))`
 
 Also scan for input paths to determine dependencies.
 
@@ -39,6 +45,9 @@ Follow the relevant Makefile conventions:
 - Joint production for multi-output scripts
 - `.PRECIOUS` for expensive intermediates
 - A `clean` target
+- For task-group Makefiles under `code/<task_group>/`, keep script
+  prerequisites local (for example `analysis.R`) and route outputs through
+  `OUTPUT_ROOT ?= ../../output`
 
 ### 4. Present for Review
 

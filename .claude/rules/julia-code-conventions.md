@@ -14,7 +14,8 @@ paths:
 
 - `Random.seed!(YYYYMMDD)` called ONCE at top (YYYYMMDD format) **ONCE CHOOSING A SEED DO NOT CHANGE IT AGAIN**
 - All dependencies loaded at top via `using` or `import`
-- All paths relative to repository root using `joinpath()`
+- All paths relative to the script working directory using `joinpath()`
+- Use forward slashes in any literal filepath; never write Windows-style backslashes
 - Rely on the Makefile to make directories
 
 ## 2. Function Design
@@ -51,17 +52,22 @@ paths:
 
 ## 4. Output Paths & Data Persistence
 
-All code outputs go to canonical subdirectories under `output/`:
+Task-group scripts usually run from `code/[task_group]/`, so paths are
+relative to that working directory. In the standard layout, define
+`output_root` once and write into the canonical subdirectories under the
+repo-root `output/` directory:
 
 ```julia
+output_root = joinpath("..", "..", "output")
+
 # Figures
-savefig(joinpath("output", "figures", "my_plot.pdf"))
+savefig(joinpath(output_root, "figures", "my_plot.pdf"))
 
 # Tables / data
-CSV.write(joinpath("output", "tables", "my_results.csv"), df)
+CSV.write(joinpath(output_root, "tables", "my_results.csv"), df)
 
 # Inline numbers for manuscript (\newcommand .txt files)
-open(joinpath("output", "numbers", "my_estimate.txt"), "w") do io
+open(joinpath(output_root, "numbers", "my_estimate.txt"), "w") do io
     println(io, "\\newcommand{\\myEstimate}{2.31}")
 end
 ```
@@ -72,10 +78,10 @@ end
 using JLD2
 
 # Save
-jldsave(joinpath("output", "tables", "descriptive_name.jld2"); result, summary_table)
+jldsave(joinpath(output_root, "tables", "descriptive_name.jld2"); result, summary_table)
 
 # Load
-data = load(joinpath("output", "tables", "descriptive_name.jld2"))
+data = load(joinpath(output_root, "tables", "descriptive_name.jld2"))
 ```
 
 Prefer JLD2 for Julia-native objects. Use `Serialization.serialize`/`deserialize` only as a fallback for objects JLD2 cannot handle.
@@ -84,10 +90,10 @@ Prefer JLD2 for Julia-native objects. Use `Serialization.serialize`/`deserialize
 using DelimitedFiles
 
 # Save
-writedlm(joinpath("output", "tables", "descriptive_name.csv"), data, ',')
+writedlm(joinpath(output_root, "tables", "descriptive_name.csv"), data, ',')
 
 # Load
-data = readdlm(joinpath("output", "tables", "descriptive_name.csv"), ',')
+data = readdlm(joinpath(output_root, "tables", "descriptive_name.csv"), ',')
 ```
 
 Prefer CSV for model output. When saving results for simulations with different parameter values (e.g. `\alpha = 5` `\beta = 2`), have these values in the file name and ensure the file name is ASCII standard (e.g. strip hats). For example:
@@ -95,7 +101,7 @@ Prefer CSV for model output. When saving results for simulations with different 
 ```julia
 # Save specific scenario
 scenario = "alpha_$(α)_beta_$(β)"
-writedlm(joinpath("output", "tables", "$(scenario)_descriptive_name.csv"), data, ',')
+writedlm(joinpath(output_root, "tables", "$(scenario)_descriptive_name.csv"), data, ',')
 ```
 
 ## 5. Common Pitfalls

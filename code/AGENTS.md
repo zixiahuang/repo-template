@@ -4,6 +4,16 @@ These conventions apply to all scripts in `code/` and its subdirectories.
 
 ---
 
+## Path Style
+
+- Use forward slashes in any literal filepath on every platform, including
+  Windows (for example `../../output/tables/results.csv`)
+- Never write Windows-style backslashes in path literals
+- Path helpers such as `file.path()`, `joinpath()`, and `fullfile()` remain
+  preferred for programmatic path construction
+
+---
+
 ## R Code Standards
 
 **Standard:** Senior Principal Data Engineer + PhD researcher quality
@@ -12,7 +22,7 @@ These conventions apply to all scripts in `code/` and its subdirectories.
 
 - `set.seed()` called ONCE at top (YYYYMMDD format)
 - All packages loaded at top via `library()` (not `require()`)
-- All paths relative to repository root
+- All paths relative to the script working directory (usually `code/[task_group]/`)
 - Rely on the Makefile to make directories
 
 ### 2. Function Design
@@ -84,18 +94,23 @@ ggsave(filepath, width = 8, height = 8, bg = "transparent")
 
 ### 5. Output Paths
 
-All code outputs go to canonical subdirectories under `output/`:
+Task-group scripts usually run from `code/[task_group]/`, so paths are
+relative to that working directory. In the standard layout, define
+`output_root` once and write into the canonical subdirectories under the
+repo-root `output/` directory:
 
 ```r
+output_root = file.path("..", "..", "output")
+
 # Figures
-ggsave(file.path("output", "figures", "my_plot.pdf"), width = 8, height = 8, bg = "transparent")
+ggsave(file.path(output_root, "figures", "my_plot.pdf"), width = 8, height = 8, bg = "transparent")
 
 # Tables / RDS
-saveRDS(result, file.path("output", "tables", "my_results.rds"))
+saveRDS(result, file.path(output_root, "tables", "my_results.rds"))
 
 # Inline numbers for manuscript (\newcommand .txt files)
 writeLines("\\newcommand{\\myEstimate}{2.31}",
-           file.path("output", "numbers", "my_estimate.txt"))
+           file.path(output_root, "numbers", "my_estimate.txt"))
 ```
 
 **Heavy computations saved as RDS; slide rendering loads pre-computed data.**
@@ -119,7 +134,7 @@ writeLines("\\newcommand{\\myEstimate}{2.31}",
 ```
 [ ] Packages at top via library()
 [ ] set.seed() once at top
-[ ] All paths relative
+[ ] All paths relative to the script working directory
 [ ] Functions documented (Roxygen)
 [ ] Figures: transparent bg, explicit dimensions
 [ ] RDS: every computed object saved
@@ -136,7 +151,7 @@ writeLines("\\newcommand{\\myEstimate}{2.31}",
 
 - `Random.seed!(YYYYMMDD)` called ONCE at top (YYYYMMDD format) **ONCE CHOOSING A SEED DO NOT CHANGE IT AGAIN**
 - All dependencies loaded at top via `using` or `import`
-- All paths relative to repository root using `joinpath()`
+- All paths relative to the script working directory using `joinpath()`
 - Rely on the Makefile to make directories
 
 ### 2. Function Design
@@ -156,15 +171,22 @@ writeLines("\\newcommand{\\myEstimate}{2.31}",
 
 ### 4. Output Paths & Data Persistence
 
+Task-group scripts usually run from `code/[task_group]/`, so paths are
+relative to that working directory. In the standard layout, define
+`output_root` once and write into the canonical subdirectories under the
+repo-root `output/` directory:
+
 ```julia
+output_root = joinpath("..", "..", "output")
+
 # Figures
-savefig(joinpath("output", "figures", "my_plot.pdf"))
+savefig(joinpath(output_root, "figures", "my_plot.pdf"))
 
 # Tables / data
-CSV.write(joinpath("output", "tables", "my_results.csv"), df)
+CSV.write(joinpath(output_root, "tables", "my_results.csv"), df)
 
 # Inline numbers for manuscript
-open(joinpath("output", "numbers", "my_estimate.txt"), "w") do io
+open(joinpath(output_root, "numbers", "my_estimate.txt"), "w") do io
     println(io, "\\newcommand{\\myEstimate}{2.31}")
 end
 ```
@@ -207,7 +229,7 @@ Prefer JLD2 for Julia-native objects. Use CSV for model output. When saving para
 ```
 [ ] Dependencies loaded at top via using/import
 [ ] Random.seed!() once at top
-[ ] All paths relative via joinpath()
+[ ] All paths relative via joinpath() from the script working directory
 [ ] Functions documented (triple-quoted docstrings)
 [ ] JLD2: every computed object saved
 [ ] Comments explain WHY not WHAT
@@ -227,7 +249,7 @@ Prefer JLD2 for Julia-native objects. Use CSV for model output. When saving para
 - `version` pinned near the top of each script or program
 - `set more off` in batch scripts
 - `set seed` called ONCE at top if stochastic operations are present
-- All paths relative to repository root
+- All paths relative to the script working directory (usually `code/[task_group]/`)
 - No hardcoded absolute paths and no `cd`
 - Prefer local macros and program arguments over global macros
 - Rely on the Makefile to make directories
@@ -251,13 +273,18 @@ Prefer JLD2 for Julia-native objects. Use CSV for model output. When saving para
 
 ### 4. Output Paths
 
-All code outputs go to canonical subdirectories under `output/`:
+Task-group scripts usually run from `code/[task_group]/`, so paths are
+relative to that working directory. In the standard layout, define
+`output_root` once and write into the canonical subdirectories under the
+repo-root `output/` directory:
 
 ```stata
-save "output/tables/my_results.dta", replace
-export delimited using "output/tables/my_results.csv", replace
+local output_root "../../output"
 
-file open fh using "output/numbers/my_estimate.txt", write text replace
+save "`output_root'/tables/my_results.dta", replace
+export delimited using "`output_root'/tables/my_results.csv", replace
+
+file open fh using "`output_root'/numbers/my_estimate.txt", write text replace
 file write fh "\newcommand{\myEstimate}{2.31}" _n
 file close fh
 ```
@@ -289,7 +316,7 @@ file close fh
 [ ] All paths relative and no cd
 [ ] Programs documented and arguments validated with syntax
 [ ] merge/reshape steps checked with assert/isid/duplicates logic
-[ ] Outputs saved to output/
+[ ] Outputs saved under the repo-root output/ directory via relative paths
 [ ] Comments explain WHY not WHAT
 [ ] capture followed by _rc checks
 [ ] preserve/restore blocks are balanced
@@ -304,7 +331,7 @@ file close fh
 ### 1. Reproducibility
 
 - `rng()` called ONCE at top if stochastic operations are present (never inside loops/functions)
-- All paths relative to repository root
+- All paths relative to the script working directory (usually `code/[task_group]/`)
 - Path construction uses `filesep` or `fullfile()` for cross-platform compatibility
 - No hardcoded absolute paths (e.g., `/Users/...`, `C:\Users\...`)
 - Rely on the Makefile to make directories (when Makefiles exist)
@@ -347,15 +374,22 @@ Projects using optimization should follow a dual-solver pattern (e.g., KNITRO + 
 
 ### 5. Output Paths
 
-All code outputs go to canonical subdirectories under `output/`:
+Task-group scripts usually run from `code/[task_group]/`, so paths are
+relative to that working directory. In the standard layout, define
+`output_root` once and write into the canonical subdirectories under the
+repo-root `output/` directory:
 
 ```matlab
-writetable(results, fullfile("output", "tables", "results.csv"));
-writematrix(data, fullfile("output", "tables", "output.csv"));
-save(fullfile("output", "tables", "results.mat"), "results", "params");
+output_root = fullfile("..", "..", "output");
+
+writetable(results, fullfile(output_root, "tables", "results.csv"));
+writematrix(data, fullfile(output_root, "tables", "output.csv"));
+save(fullfile(output_root, "tables", "results.mat"), "results", "params");
 ```
 
-Projects with a `Params` struct may wrap these paths (e.g., `Params.outputdir` instead of `"output"`), but the canonical subdirectories (`tables/`, `figures/`, `numbers/`) remain the same.
+Projects with a `Params` struct may wrap these paths (e.g., `Params.outputdir`
+instead of `output_root`), but the canonical subdirectories (`tables/`,
+`figures/`, `numbers/`) remain the same.
 
 ### 6. Common Pitfalls
 
@@ -377,7 +411,7 @@ Projects with a `Params` struct may wrap these paths (e.g., `Params.outputdir` i
 
 ```
 [ ] rng() once at top (if stochastic)
-[ ] All paths relative with filesep/fullfile()
+[ ] All paths relative with filesep/fullfile() from the script working directory
 [ ] Functions documented (comment-block docstrings)
 [ ] Solver exitflag checked after every optimization call
 [ ] NaN/Inf guards on data input and solver output
@@ -401,14 +435,22 @@ Projects with a `Params` struct may wrap these paths (e.g., `Params.outputdir` i
 
 ### Directory Creation
 
-Use order-only prerequisites for output subdirectories:
+Use order-only prerequisites for output subdirectories. In task-group
+Makefiles under `code/[task_group]/`, keep script prerequisites local and route
+generated files to the repo-root `output/` directory through a relative output
+root:
 
 ```make
-output/tables/results.csv: code/analysis.R | output/tables
-output/figures/plot.pdf: code/figures.R | output/figures
-output/numbers/estimate.txt: code/analysis.R | output/numbers
+OUTPUT_ROOT = ../../output
 
-output/tables output/figures output/numbers:
+$(OUTPUT_ROOT)/tables/results.csv: analysis.R | $(OUTPUT_ROOT)/tables
+	Rscript $<
+$(OUTPUT_ROOT)/figures/plot.pdf: figures.R | $(OUTPUT_ROOT)/figures
+	Rscript $<
+$(OUTPUT_ROOT)/numbers/estimate.txt: analysis.R | $(OUTPUT_ROOT)/numbers
+	Rscript $<
+
+$(OUTPUT_ROOT)/tables $(OUTPUT_ROOT)/figures $(OUTPUT_ROOT)/numbers:
 	mkdir -p $@
 ```
 
@@ -417,8 +459,10 @@ Scripts must NOT create directories themselves. The Makefile owns all directory 
 ### Cross-Makefile Dependencies
 
 ```make
-../sibling_dir/output.csv:
-	$(MAKE) -C ../sibling_dir output.csv
+OUTPUT_ROOT = ../../output
+
+$(OUTPUT_ROOT)/tables/sibling_output.csv:
+	$(MAKE) -C ../sibling_dir $(OUTPUT_ROOT)/tables/sibling_output.csv
 ```
 
 ### Expensive Intermediates
@@ -428,21 +472,30 @@ Mark expensive-to-produce files as `.PRECIOUS` so Make does not delete them on i
 ### Pattern Rules
 
 ```make
+OUTPUT_ROOT = ../../output
 STATA ?= stata-mp
 
-output/tables/%.rds: code/%.R | output/tables
+$(OUTPUT_ROOT)/tables/%.rds: %.R | $(OUTPUT_ROOT)/tables
 	Rscript $<
 
-output/tables/%.csv: code/%.jl | output/tables
+$(OUTPUT_ROOT)/tables/%.csv: %.jl | $(OUTPUT_ROOT)/tables
 	julia $<
 
-output/tables/%.dta: code/%.do | output/tables
+$(OUTPUT_ROOT)/tables/%.dta: %.do | $(OUTPUT_ROOT)/tables
 	$(STATA) -b do $<
 ```
 
 ### Joint Production
 
 When a single script produces multiple outputs, declare one primary target with the recipe and secondary targets with an empty recipe (`;`).
+
+```make
+OUTPUT_ROOT = ../../output
+
+$(OUTPUT_ROOT)/tables/results.csv $(OUTPUT_ROOT)/figures/diagnostics.pdf: analysis.R | $(OUTPUT_ROOT)/tables $(OUTPUT_ROOT)/figures
+	Rscript $<
+$(OUTPUT_ROOT)/figures/diagnostics.pdf: $(OUTPUT_ROOT)/tables/results.csv ;
+```
 
 ### Recipe Conventions
 
@@ -452,6 +505,8 @@ When a single script produces multiple outputs, declare one primary target with 
 - MATLAB scripts: `matlab -batch "run('$<')"`
 - Always use `$<` (first prerequisite) and `$@` (target) automatic variables
 - Never use absolute paths
+- In task-group Makefiles, keep script prerequisites local (`analysis.R`) and
+  route outputs through `$(OUTPUT_ROOT)`
 
 ### Root Makefile Pattern
 

@@ -56,6 +56,9 @@ PROTOCOL_REQUIRED_SNIPPETS = {
         "`export delimited`",
         "`file write`",
         "`$(STATA) -b do $<`",
+        "file.path(\"..\", \"..\", \"output\")",
+        "joinpath(\"..\", \"..\", \"output\")",
+        "OUTPUT_ROOT ?= ../../output",
     ),
     "protocols/skills/verify-outputs.md": (
         "`export delimited`",
@@ -66,6 +69,76 @@ PROTOCOL_REQUIRED_SNIPPETS = {
     "protocols/skills/review-makefile.md": (
         "`.R`, `.jl`, `.do`, `.ado`, and `.m`",
         "`$(STATA) -b do $<`",
+    ),
+}
+
+PATH_MODEL_REQUIRED_SNIPPETS = {
+    "code/AGENTS.md": (
+        "script working directory",
+        'output_root = file.path("..", "..", "output")',
+        'output_root = joinpath("..", "..", "output")',
+        'local output_root "../../output"',
+        'output_root = fullfile("..", "..", "output");',
+        "OUTPUT_ROOT = ../../output",
+        "Use forward slashes in any literal filepath",
+    ),
+    ".claude/rules/r-code-conventions.md": (
+        'output_root = file.path("..", "..", "output")',
+        "Use forward slashes in any literal filepath",
+    ),
+    ".claude/rules/julia-code-conventions.md": (
+        'output_root = joinpath("..", "..", "output")',
+        "Use forward slashes in any literal filepath",
+    ),
+    ".claude/rules/stata-code-conventions.md": (
+        'local output_root "../../output"',
+        "Use forward slashes in any literal filepath",
+    ),
+    ".claude/rules/matlab-code-conventions.md": (
+        'output_root = fullfile("..", "..", "output");',
+        "Use forward slashes in any literal filepath",
+    ),
+    ".claude/rules/makefile-conventions.md": (
+        "OUTPUT_ROOT = ../../output",
+        "$(OUTPUT_ROOT)/tables/results.csv: analysis.R | $(OUTPUT_ROOT)/tables",
+    ),
+    "README.md": (
+        "working-directory-relative",
+        'output_root = file.path("..", "..", "output")',
+        'output_root = joinpath("..", "..", "output")',
+        'local output_root "../../output"',
+        'output_root = fullfile("..", "..", "output");',
+    ),
+}
+
+PATH_MODEL_FORBIDDEN_SNIPPETS = {
+    "code/AGENTS.md": (
+        "relative to repository root",
+        "code/analysis.R | output/tables",
+        'file.path("output", "figures", "my_plot.pdf")',
+        'joinpath("output", "figures", "my_plot.pdf")',
+        'save "output/tables/my_results.dta", replace',
+        'fullfile("output", "tables", "results.csv")',
+    ),
+    ".claude/rules/r-code-conventions.md": (
+        "relative to repository root",
+        'file.path("output", "figures", "my_plot.pdf")',
+    ),
+    ".claude/rules/julia-code-conventions.md": (
+        "relative to repository root",
+        'joinpath("output", "figures", "my_plot.pdf")',
+    ),
+    ".claude/rules/stata-code-conventions.md": (
+        "relative to repository root",
+        'save "output/tables/my_results.dta", replace',
+    ),
+    ".claude/rules/matlab-code-conventions.md": (
+        "relative to repository root",
+        'fullfile("output", "tables", "results.csv")',
+    ),
+    ".claude/rules/makefile-conventions.md": (
+        "code/analysis.R | output/tables",
+        "code/%.R | output/tables",
     ),
 }
 
@@ -179,6 +252,28 @@ def check_protocol_required_snippets(errors: list[str]) -> None:
                 )
 
 
+def check_path_model_snippets(errors: list[str]) -> None:
+    for relative_path, snippets in PATH_MODEL_REQUIRED_SNIPPETS.items():
+        file_path = REPO_ROOT / relative_path
+        file_text = file_path.read_text()
+
+        for snippet in snippets:
+            if snippet not in file_text:
+                errors.append(
+                    f"{file_path.relative_to(REPO_ROOT)} is missing required path-model text: {snippet!r}"
+                )
+
+    for relative_path, snippets in PATH_MODEL_FORBIDDEN_SNIPPETS.items():
+        file_path = REPO_ROOT / relative_path
+        file_text = file_path.read_text()
+
+        for snippet in snippets:
+            if snippet in file_text:
+                errors.append(
+                    f"{file_path.relative_to(REPO_ROOT)} still contains forbidden path-model text: {snippet!r}"
+                )
+
+
 def main() -> int:
     errors: list[str] = []
 
@@ -216,6 +311,7 @@ def main() -> int:
     check_agent_protocol_refs(errors)
     check_commit_protocol_branch_policy(errors)
     check_protocol_required_snippets(errors)
+    check_path_model_snippets(errors)
 
     if errors:
         print("Template consistency check failed:")

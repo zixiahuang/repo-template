@@ -15,14 +15,22 @@ paths:
 
 ## Directory Creation
 
-Use order-only prerequisites for output subdirectories:
+Use order-only prerequisites for output subdirectories. In task-group
+Makefiles under `code/[task_group]/`, keep script prerequisites local and route
+generated files to the repo-root `output/` directory through a relative output
+root:
 
 ```make
-output/tables/results.csv: code/analysis.R | output/tables
-output/figures/plot.pdf: code/figures.R | output/figures
-output/numbers/estimate.txt: code/analysis.R | output/numbers
+OUTPUT_ROOT = ../../output
 
-output/tables output/figures output/numbers:
+$(OUTPUT_ROOT)/tables/results.csv: analysis.R | $(OUTPUT_ROOT)/tables
+	Rscript $<
+$(OUTPUT_ROOT)/figures/plot.pdf: figures.R | $(OUTPUT_ROOT)/figures
+	Rscript $<
+$(OUTPUT_ROOT)/numbers/estimate.txt: analysis.R | $(OUTPUT_ROOT)/numbers
+	Rscript $<
+
+$(OUTPUT_ROOT)/tables $(OUTPUT_ROOT)/figures $(OUTPUT_ROOT)/numbers:
 	mkdir -p $@
 ```
 
@@ -33,8 +41,10 @@ Scripts must NOT create directories themselves. The Makefile owns all directory 
 When a target in one sub-Makefile depends on output from another:
 
 ```make
-../sibling_dir/output.csv:
-	$(MAKE) -C ../sibling_dir output.csv
+OUTPUT_ROOT = ../../output
+
+$(OUTPUT_ROOT)/tables/sibling_output.csv:
+	$(MAKE) -C ../sibling_dir $(OUTPUT_ROOT)/tables/sibling_output.csv
 ```
 
 ## Expensive Intermediates
@@ -50,17 +60,18 @@ Mark expensive-to-produce files as `.PRECIOUS` so Make does not delete them on i
 Use pattern rules for parametric outputs:
 
 ```make
+OUTPUT_ROOT = ../../output
 # R pattern rule
-output/tables/%.rds: code/%.R | output/tables
+$(OUTPUT_ROOT)/tables/%.rds: %.R | $(OUTPUT_ROOT)/tables
 	Rscript $<
 
 # Julia pattern rule
-output/tables/%.csv: code/%.jl | output/tables
+$(OUTPUT_ROOT)/tables/%.csv: %.jl | $(OUTPUT_ROOT)/tables
 	julia $<
 
 # Stata pattern rule
 STATA ?= stata-mp
-output/tables/%.dta: code/%.do | output/tables
+$(OUTPUT_ROOT)/tables/%.dta: %.do | $(OUTPUT_ROOT)/tables
 	$(STATA) -b do $<
 ```
 
@@ -69,9 +80,11 @@ output/tables/%.dta: code/%.do | output/tables
 When a single script produces multiple outputs, declare one primary target with the recipe and secondary targets with an empty recipe (`;`):
 
 ```make
-output/tables/results.csv output/figures/diagnostics.pdf: code/analysis.R | output/tables output/figures
+OUTPUT_ROOT = ../../output
+
+$(OUTPUT_ROOT)/tables/results.csv $(OUTPUT_ROOT)/figures/diagnostics.pdf: analysis.R | $(OUTPUT_ROOT)/tables $(OUTPUT_ROOT)/figures
 	Rscript $<
-output/figures/diagnostics.pdf: output/tables/results.csv ;
+$(OUTPUT_ROOT)/figures/diagnostics.pdf: $(OUTPUT_ROOT)/tables/results.csv ;
 ```
 
 ## Recipe Conventions
@@ -81,6 +94,7 @@ output/figures/diagnostics.pdf: output/tables/results.csv ;
 - Stata scripts: `$(STATA) -b do $<` with `STATA ?= stata-mp` (or your local Stata binary)
 - Always use `$<` (first prerequisite) and `$@` (target) automatic variables
 - Never use absolute paths — all paths are relative to the Makefile's directory
+- In task-group Makefiles, keep script prerequisites local (`analysis.R`) and route outputs through `$(OUTPUT_ROOT)`
 
 ## Root Makefile Pattern
 

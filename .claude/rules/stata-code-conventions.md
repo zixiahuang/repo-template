@@ -17,7 +17,8 @@ paths:
 - `version` pinned near the top of each script or program
 - `set more off` in batch scripts
 - `set seed` called ONCE at top if stochastic operations are present
-- All paths relative to repository root
+- All paths relative to the script working directory (usually `code/[task_group]/`)
+- Use forward slashes in any literal filepath; never write Windows-style backslashes
 - No hardcoded absolute paths and no `cd`
 - Prefer local macros and program arguments over global macros
 - Rely on the Makefile to make directories when Makefiles exist
@@ -41,15 +42,20 @@ paths:
 
 ## 4. Output Paths
 
-All code outputs go to canonical subdirectories under `output/`:
+Task-group scripts usually run from `code/[task_group]/`, so paths are
+relative to that working directory. In the standard layout, define
+`output_root` once and write into the canonical subdirectories under the
+repo-root `output/` directory:
 
 ```stata
+local output_root "../../output"
+
 * Tables / data
-save "output/tables/my_results.dta", replace
-export delimited using "output/tables/my_results.csv", replace
+save "`output_root'/tables/my_results.dta", replace
+export delimited using "`output_root'/tables/my_results.csv", replace
 
 * Inline numbers for manuscript (\newcommand .txt files)
-file open fh using "output/numbers/my_estimate.txt", write text replace
+file open fh using "`output_root'/numbers/my_estimate.txt", write text replace
 file write fh "\newcommand{\myEstimate}{2.31}" _n
 file close fh
 ```
