@@ -370,31 +370,38 @@ The pipeline keeps computed results out of your `.tex` source by writing `\newco
 
 ### How it works
 
-1. **Code generates a `.txt` file** with a `\newcommand`:
+1. **Code generates a `.txt` file** with a `\newcommand`.
+   In the standard `code/[task_group]/` layout, task-group scripts reach the
+   repo-root `output/` directory via a working-directory-relative
+   `output_root`:
 
    **R:**
    ```r
+   output_root = file.path("..", "..", "output")
    writeLines("\\newcommand{\\revenueEstimate}{4.72}",
-              file.path("output", "numbers", "revenue_estimate.txt"))
+              file.path(output_root, "numbers", "revenue_estimate.txt"))
    ```
 
    **Julia:**
    ```julia
-   open(joinpath("output", "numbers", "revenue_estimate.txt"), "w") do io
+   output_root = joinpath("..", "..", "output")
+   open(joinpath(output_root, "numbers", "revenue_estimate.txt"), "w") do io
        println(io, "\\newcommand{\\revenueEstimate}{4.72}")
    end
    ```
 
    **Stata:**
    ```stata
-   file open fh using "output/numbers/revenue_estimate.txt", write text replace
+   local output_root "../../output"
+   file open fh using "`output_root'/numbers/revenue_estimate.txt", write text replace
    file write fh "\newcommand{\revenueEstimate}{4.72}" _n
    file close fh
    ```
 
    **MATLAB:**
    ```matlab
-   fid = fopen(fullfile("output", "numbers", "revenue_estimate.txt"), "w");
+   output_root = fullfile("..", "..", "output");
+   fid = fopen(fullfile(output_root, "numbers", "revenue_estimate.txt"), "w");
    fprintf(fid, '\\newcommand{\\revenueEstimate}{4.72}\n');
    fclose(fid);
    ```

@@ -43,7 +43,7 @@ numerical optimization and scientific computing.
 #### 3. Reproducibility
 
 - `rng()` called once if stochastic
-- Paths relative to the repository root
+- Paths relative to the script working directory (typically `code/<task_group>/`)
 - Path construction via `filesep` or `fullfile()`
 - No hardcoded absolute paths
 
