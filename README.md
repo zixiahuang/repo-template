@@ -125,9 +125,10 @@ Codex project configuration lives in:
 - **`AGENTS.md`** (root) — project instructions and workflow rules (loaded every session)
 - **`code/AGENTS.md`** — R, Julia, Stata, MATLAB, and Makefile conventions (loaded when working in `code/`)
 - **`latex/AGENTS.md`** — LaTeX conventions (loaded when working in `latex/`)
+- **`protocols/skills/*.md`** — canonical shared skill bodies for both tools
 - **`.codex/config.toml`** — model, sandbox, and approval settings
 - **`.codex/rules/default.rules`** — command execution permissions (Starlark format)
-- **`.agents/skills/*/SKILL.md`** — reusable skill definitions
+- **`.agents/skills/*/SKILL.md`** — thin Codex wrappers around the shared protocols
 
 ### Codex vs Claude Code: Key Differences
 
@@ -136,9 +137,10 @@ Codex project configuration lives in:
 | Instructions file | `CLAUDE.md` | `AGENTS.md` (hierarchical) |
 | Settings | `.claude/settings.json` (JSON) | `.codex/config.toml` (TOML) |
 | Permission rules | Glob patterns in settings.json | `.codex/rules/default.rules` (Starlark) |
-| Behavioral rules | `.claude/rules/*.md` (separate files) | Inlined into `AGENTS.md` hierarchy |
-| Agent definitions | `.claude/agents/*.md` | Inlined into review skills |
-| Skills | `.claude/skills/*/SKILL.md` | `.agents/skills/*/SKILL.md` |
+| Project conventions | `.claude/rules/*.md` (separate files) | Inlined into `AGENTS.md` hierarchy |
+| Shared skill bodies | `protocols/skills/*.md` | `protocols/skills/*.md` |
+| Agent definitions | `.claude/agents/*.md` | Not supported |
+| Skills | Thin wrappers in `.claude/skills/*/SKILL.md` | Thin wrappers in `.agents/skills/*/SKILL.md` |
 | Hooks | `.claude/hooks/*` | Not supported (use git hooks) |
 
 ### Known Limitations (Codex)
@@ -274,7 +276,7 @@ Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles
 | `matlab-reviewer` | MATLAB code quality, solver configuration, derivative correctness |
 | `domain-reviewer` | Substantive review for manuscripts, slides, and teaching materials |
 | `proofreader` | Academic proofreading for manuscripts, slides, and notes |
-| `tex-reviewer` | LaTeX manuscript quality, hardcoded numbers, citation consistency |
+| `tex-reviewer` | LaTeX hardcoded-number review for manuscripts and slides |
 | `makefile-reviewer` | Makefile conventions, dependency correctness, script coverage |
 | `verifier` | End-to-end build verification with orphaned script check |
 
@@ -282,7 +284,7 @@ Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles
 
 | Skill | What It Does |
 |-------|-------------|
-| `/commit` | Stage, commit, PR, merge (with `make -n` staleness warning) |
+| `/commit` | Stage, commit, PR, merge on the current non-`main` branch; create a branch only when needed |
 | `/data-analysis` | End-to-end R analysis workflow |
 | `/refactor [file-or-dir]` | Verify-refactor-verify loop for safe style changes |
 | `/verify-outputs [script]` | Checksum outputs, compare to reference |
@@ -294,12 +296,16 @@ Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles
 | `/review-julia [file]` | Julia code quality review via julia-reviewer agent |
 | `/review-stata [file]` | Stata code quality review via stata-reviewer agent |
 | `/review-matlab [file]` | MATLAB code quality review via matlab-reviewer agent |
-| `/review-tex [file]` | LaTeX manuscript review via tex-reviewer agent |
+| `/review-tex [file]` | LaTeX hardcoded-number review for manuscripts and slides via tex-reviewer agent |
 | `/review-makefile [file]` | Makefile conventions review via makefile-reviewer agent |
 | `/review-domain [file]` | Opt-in substantive domain review via domain-reviewer agent |
 | `/proofread [file]` | Opt-in proofreading review via proofreader agent |
 | `/review-comments [path]` | Clean up comments, docstrings, dead code |
 | `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
+
+### Shared Skill Protocols (`protocols/skills/`)
+
+Canonical bodies for all 18 shared skills. Both `.claude/skills/` and `.agents/skills/` point at these files, and Claude review agents execute the same protocol files rather than owning separate copies.
 
 ### Key Rules (`.claude/rules/`)
 
@@ -329,9 +335,10 @@ Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles
 | `AGENTS.md` (root) | Project root | Core instructions + workflow rules |
 | `code/AGENTS.md` | `code/` | R, Julia, Stata, MATLAB, and Makefile conventions |
 | `latex/AGENTS.md` | `latex/` | LaTeX conventions |
+| `protocols/skills/*.md` | `protocols/skills/` | Canonical shared skill bodies |
 | `.codex/config.toml` | `.codex/` | Optional Codex project overrides for sandbox, approval, and model behavior |
 | `.codex/rules/default.rules` | `.codex/rules/` | Command execution permissions (Starlark) |
-| `.agents/skills/*/SKILL.md` | `.agents/skills/` | 17 reusable skills (same as Claude) |
+| `.agents/skills/*/SKILL.md` | `.agents/skills/` | 18 thin wrappers around the shared protocols |
 
 </details>
 
@@ -349,7 +356,7 @@ Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles
 | MATLAB | Numerical optimization and structural models | MathWorks installer; ensure `matlab` is on `PATH` |
 | pdflatex | Manuscript compilation | Included with TeX Live / MacTeX |
 | [gh CLI](https://cli.github.com/) | PR workflow | `brew install gh` (macOS) |
-| [jq](https://jqlang.github.io/jq/) | Claude Code hooks (3 of 4 use it) | `brew install jq` (macOS) |
+| [jq](https://jqlang.github.io/jq/) | Claude Code hooks and `/review-pr` thread parsing | `brew install jq` (macOS) |
 
 Not all tools are needed — install only what your project uses. Either Claude Code or Codex CLI is the only hard requirement.
 
@@ -416,11 +423,56 @@ The same `TEXINPUTS` mechanism resolves figures (`output/figures/`) and tables (
 
 ---
 
-## Adapting for Your Field
+## Maintenance: Keeping Claude and Codex in Sync
 
-1. **Add field-specific pitfalls** to `.claude/rules/r-code-conventions.md`, `.claude/rules/julia-code-conventions.md`, `.claude/rules/stata-code-conventions.md`, and `.claude/rules/matlab-code-conventions.md`
-2. **Adjust tolerance thresholds** in `.claude/rules/quality-gates.md` for your domain's precision requirements
-3. **Set up the `code/` directory** with sub-Makefiles matching your pipeline stages
+This repo now uses a three-layer skill architecture:
+
+- **`protocols/skills/`** — canonical shared skill bodies
+- **`.claude/skills/`** — Claude wrappers
+- **`.agents/skills/`** — Codex wrappers
+
+Claude also has a tool-specific execution layer in **`.claude/agents/`** for review-oriented skills. Those agents execute the same shared protocol files rather than owning separate checklists.
+
+### What must stay in sync
+
+| Component | Location | Keep in sync? |
+|-----------|----------|---------------|
+| Command permissions | `.claude/settings.json.example` and `.codex/rules/default.rules` | Yes |
+| Shared skill bodies | `protocols/skills/*.md` | Yes |
+| Skill wrapper names and descriptions | `.claude/skills/*/SKILL.md` and `.agents/skills/*/SKILL.md` | Yes |
+| Project conventions | `.claude/rules/*.md` and the `AGENTS.md` hierarchy | Yes |
+
+### What intentionally differs
+
+- **Frontmatter format.** Claude wrappers use Claude frontmatter; Codex wrappers use Codex frontmatter.
+- **Agent layer.** Claude has `.claude/agents/` for review-oriented execution surfaces. Codex does not.
+- **Hooks.** Claude supports `.claude/hooks/`; Codex does not.
+
+### When adding a new skill or convention
+
+1. Add or update the canonical body in `protocols/skills/<name>.md`
+2. Update `.claude/skills/<name>/SKILL.md`
+3. Update `.agents/skills/<name>/SKILL.md`
+4. If it is a review-oriented Claude agent surface, update the matching file in `.claude/agents/`
+5. If the skill needs new commands, update both permission config files
+6. Run `make check-template`
+
+## Template Consistency Checker
+
+Run `make check-template` to validate:
+
+- permission parity between Claude and Codex configs
+- shared protocol and wrapper inventory parity
+- wrapper references to `protocols/skills/*.md`
+- Claude review-agent references to the same canonical protocol files
+
+## Fresh Main Branch
+
+When maintaining this template repo itself, treat ad hoc files under
+`quality_reports/` as branch-local working artifacts rather than permanent
+template content. Before merging back to `main`, remove task-specific plans,
+session logs, merge reports, and scratch directories so the default branch ships
+clean. Keep only placeholder `.gitkeep` files and intentional template assets.
 
 ---
 
@@ -431,9 +483,11 @@ my-project/
 ├── CLAUDE.md                    # Claude Code instructions (loaded every session)
 ├── AGENTS.md                    # Codex CLI instructions (loaded every session)
 ├── Makefile                     # Root — delegates to code/ and latex/
-├── .claude/                     # Claude Code: rules, skills, agents, hooks
+├── protocols/
+│   └── skills/                  # Canonical shared skill bodies
+├── .claude/                     # Claude Code: rules, wrappers, agents, hooks
 ├── .codex/                      # Codex CLI: config and permission rules
-├── .agents/                     # Codex CLI: skill definitions
+├── .agents/                     # Codex CLI: thin skill wrappers
 ├── code/
 │   ├── Makefile                 # Delegates to sub-Makefiles
 │   ├── [task_group_a]/          # e.g., data cleaning (R or Stata)

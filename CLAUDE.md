@@ -16,6 +16,7 @@
 - **Verify after** -- compile/render and confirm output at the end of every task
 - **Single source of truth** -- `latex/manuscript.tex` is authoritative for the paper
 - **Quality gates** -- nothing ships below 80/100
+- **Template hygiene** -- in this template repo, remove branch-specific files under `quality_reports/` before merging to `main`; keep `main` fresh
 - **[LEARN] tags** -- when corrected, save `[LEARN:category] wrong → right` to MEMORY.md
 
 ---
@@ -28,9 +29,12 @@
 ├── AGENTS.md                    # Codex CLI instructions
 ├── MEMORY.md                    # Persistent [LEARN] entries across sessions
 ├── Makefile                     # Root — delegates to code/ and latex/
-├── .claude/                     # Claude Code: rules, skills, agents, hooks
+├── protocols/                   # Canonical shared skill bodies
+│   └── skills/
+│       └── *.md
+├── .claude/                     # Claude Code: rules, wrappers, agents, hooks
 ├── .codex/                      # Codex CLI: config and permission rules
-├── .agents/                     # Codex CLI: skill definitions
+├── .agents/                     # Codex CLI: thin skill wrappers
 ├── code/                        # Analysis code with sub-Makefiles
 │   ├── Makefile                 # Delegates to sub-Makefiles
 │   ├── [task_group]/            # e.g., data cleaning (R/Stata), simulation (Julia), or structural model (MATLAB)
@@ -61,6 +65,7 @@
 # Make (preferred — builds everything)
 make                               # Build all (code + latex)
 make -n                            # Dry-run: show what would be built
+make check-template                # Validate shared-skill and permission sync
 make -C code                       # Build all code targets
 make -C code/[task_group] all      # Build one task group
 make -C latex                      # Compile manuscript
@@ -92,7 +97,7 @@ pdflatex -interaction=nonstopmode manuscript.tex
 
 | Command | What It Does |
 |---------|-------------|
-| `/commit [msg]` | Stage, commit, PR, merge |
+| `/commit [msg]` | Stage, commit, PR, merge on the current non-`main` branch; create a branch only when needed |
 | `/data-analysis [dataset]` | End-to-end R analysis |
 | `/refactor [file-or-dir]` | Verify-refactor-verify loop |
 | `/verify-outputs [script]` | Checksum outputs, compare to reference |
@@ -103,13 +108,21 @@ pdflatex -interaction=nonstopmode manuscript.tex
 | `/review-julia [file]` | Julia code quality review |
 | `/review-stata [file]` | Stata code quality review |
 | `/review-matlab [file]` | MATLAB code quality review |
-| `/review-tex [file]` | LaTeX manuscript review |
+| `/review-tex [file]` | LaTeX hardcoded-number review for manuscripts and slides |
 | `/review-makefile [file]` | Makefile conventions review |
 | `/review-comments [path]` | Clean up comments, docstrings, dead code |
 | `/review-domain [file]` | Substantive domain review (identification, citations, code-theory) — opt-in |
 | `/proofread [file]` | Grammar, typos, overflow, consistency check — opt-in |
 | `/review-pr [PR#]` | Address PR review comments, commit fixes, resolve threads |
 | `/matlab-optim-derivatives` | Audit MATLAB optimization derivatives |
+
+---
+
+## Shared Skill Protocols
+
+- Canonical shared skill bodies live in `protocols/skills/`
+- `.claude/skills/` and `.agents/skills/` are thin wrappers around those files
+- Review-oriented agents in `.claude/agents/` execute the same canonical protocols
 
 ---
 

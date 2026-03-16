@@ -1,31 +1,18 @@
 ---
 name: review-tex
-description: Run the LaTeX review protocol on manuscript and slides. Checks for hardcoded numbers, citation consistency, and compilation issues. Auto-fixes unambiguous hardcoded values; produces a report for ambiguous cases.
+description: Run the LaTeX review protocol on manuscript and slides. Detects hardcoded numeric results, distinguishes manuscript from slide contexts, and auto-fixes unambiguous values when the source is clear.
 disable-model-invocation: true
 argument-hint: "[filename or 'all']"
 allowed-tools: ["Read", "Grep", "Glob", "Write", "Task"]
 ---
 
-# Review LaTeX Files
+# Review LaTeX Wrapper
 
-Run the comprehensive LaTeX review protocol.
+Use the canonical shared protocol in `protocols/skills/review-tex.md`.
 
-## Steps
+## Wrapper Workflow
 
-1. **Identify files to review:**
-   - If `$ARGUMENTS` is a specific `.tex` filename: review that file only
-   - If `$ARGUMENTS` is `all`: review all `.tex` files in `latex/`
-
-2. **For each file, launch the `tex-reviewer` agent** with instructions to:
-   - Follow the full protocol in the agent instructions
-   - Check for hardcoded numbers that should use `\input` from `output/numbers/`
-   - Check citation consistency against `latex/references/references.bib`
-   - Save report to `quality_reports/[FILENAME_WITHOUT_EXT]_tex_review.md`
-
-3. **After all reviews complete**, present a summary:
-   - Total issues found per file
-   - Breakdown by severity (Critical / High / Medium / Low)
-   - Top 3 most critical issues
-
-4. **IMPORTANT: Do NOT edit any LaTeX source files unless auto-fixing (see Phase 2 in the agent instructions).**
-   For ambiguous cases, only produce reports. Fixes are applied after user review.
+1. Resolve the target scope from `$ARGUMENTS`.
+2. Read `protocols/skills/review-tex.md`.
+3. Launch the `tex-reviewer` agent for each target and instruct it to follow `protocols/skills/review-tex.md`.
+4. Present a concise summary of the findings.
