@@ -6,7 +6,7 @@ Recover context after compression or starting a new session.
 
 ### 1. Read Persistent Context
 
-1. Read `MEMORY.md` for `[LEARN]` entries and project state.
+1. Read `MEMORY.md` for structured `[LEARN]` entries and project state.
 2. Read `AGENTS.md` or `CLAUDE.md` for current project instructions.
 
 ### 2. Find the Most Recent Plan
@@ -15,12 +15,19 @@ Recover context after compression or starting a new session.
 2. Read the most recent plan file.
 3. Note its status.
 
-### 3. Find the Most Recent Session Log
+### 3. Find the Most Recent Handoff
+
+1. If `quality_reports/handoffs/` exists, list recent handoff files or
+   directories sorted by date.
+2. Read the most recent handoff note relevant to the active plan, if any.
+3. If no handoff exists, say so explicitly.
+
+### 4. Find the Most Recent Session Log
 
 1. List files in `quality_reports/session_logs/` sorted by date.
 2. Read the most recent session log.
 
-### 4. Check Git State
+### 5. Check Git State
 
 ```bash
 git log --oneline -10
@@ -29,7 +36,7 @@ git status
 git branch --show-current
 ```
 
-### 5. Present a Structured Summary
+### 6. Present a Structured Summary
 
 ```text
 ## Session Recovery
@@ -37,6 +44,7 @@ git branch --show-current
 **Current branch:** [branch name]
 **Current task:** [from plan or session log]
 **Plan status:** [status] -- [file path]
+**Latest handoff:** [file path or "None"]
 **Last completed step:** [from session log]
 **Next step:** [inferred]
 
@@ -50,7 +58,7 @@ git branch --show-current
 [from session log or "None noted"]
 ```
 
-### 6. Confirm
+### 7. Confirm
 
 Ask whether the recovered context is correct and whether to continue with the
 inferred next step.
@@ -58,4 +66,4 @@ inferred next step.
 ## Important
 
 - This is a read-only workflow.
-- If no plan or session log exists, say so explicitly.
+- If no plan, handoff, or session log exists, say so explicitly.

@@ -17,7 +17,7 @@
 - **Single source of truth** -- `latex/manuscript.tex` is authoritative for the paper
 - **Quality gates** -- nothing ships below 80/100
 - **Template hygiene** -- in this template repo, remove branch-specific files under `quality_reports/` before merging to `main`; keep `main` fresh
-- **[LEARN] tags** -- when corrected, save `[LEARN:category] wrong → right` to MEMORY.md
+- **Structured [LEARN] tags** -- when corrected or when you discover a durable lesson, save a structured `[LEARN:category]` entry to `MEMORY.md`
 
 ---
 
@@ -55,8 +55,8 @@
 │   ├── figures/                 # Generated figures
 │   ├── tables/                  # Generated tables
 │   └── numbers/                 # Inline numbers for manuscript (\newcommand .txt files)
-├── quality_reports/             # Plans, session logs, merge reports
-└── templates/                   # Session log, quality report templates
+├── quality_reports/             # Plans, handoffs, session logs, merge reports
+└── templates/                   # Session, handoff, learning, and quality templates
 ```
 
 ---
@@ -105,6 +105,8 @@ pdflatex -interaction=nonstopmode manuscript.tex
 | `/verify-outputs [script]` | Checksum outputs, compare to reference |
 | `/compare-branches [b1] [b2]` | Cross-branch output comparison |
 | `/resume` | Recover context after compression/new session |
+| `/trace [question]` | Trace an ambiguous result or failure back to its most likely cause |
+| `/learn [insight]` | Save a durable, project-specific lesson to `MEMORY.md` |
 | `/setup-makefile [dir]` | Generate Makefile from directory contents |
 | `/review-r [file]` | R code quality review |
 | `/review-julia [file]` | Julia code quality review |
@@ -143,8 +145,9 @@ pdflatex -interaction=nonstopmode manuscript.tex
 - Prefer auto-compression over `/clear`; use `/clear` only when context is
   genuinely polluted
 - After compression or a new session, read `CLAUDE.md`, read the most recent
-  plan in `quality_reports/plans/`, then inspect `git log --oneline -10` and
-  `git diff`
+  plan in `quality_reports/plans/`, read the most recent relevant handoff in
+  `quality_reports/handoffs/` if one exists, then inspect
+  `git log --oneline -10` and `git diff`
 
 ---
 
@@ -163,3 +166,9 @@ pdflatex -interaction=nonstopmode manuscript.tex
 For manuscript or slide tasks, ask during planning whether to include these optional review passes:
 - `domain-reviewer` for substantive domain review (identification, derivations, citations, code-theory alignment)
 - `proofreader` for grammar, typos, overflow, and consistency
+
+For multi-file tasks, write short handoff notes under
+`quality_reports/handoffs/` at major stage boundaries.
+
+When a durable, project-specific lesson emerges, save it to `MEMORY.md` with a
+structured `[LEARN:category]` block or use `/learn`.

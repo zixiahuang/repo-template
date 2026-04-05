@@ -21,9 +21,20 @@
 
 **HH:MM UTC:** [event description]
 
+## Linked Handoffs
+
+- `quality_reports/handoffs/YYYY-MM-DD_description/[stage-file].md`
+
 ## Learnings & Corrections
 
-- [LEARN:category] What you learned for future reference
+[LEARN:category]
+- Date: YYYY-MM-DD
+- Trigger: [symptom, mistake, or question]
+- Wrong: [incorrect assumption or behavior]
+- Right: [correct rule or approach]
+- Scope: [where this applies]
+- Evidence: [file, command, output, or user correction]
+- Action: [what to do next time]
 
 ## Verification Results
 
