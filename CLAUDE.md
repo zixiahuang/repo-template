@@ -1,7 +1,7 @@
 # CLAUDE.md -- Academic Project Development with Claude Code
 
 <!-- HOW TO USE: Replace [BRACKETED PLACEHOLDERS] with your project info.
-     Keep this file under ~150 lines — Claude loads it every session.
+     Keep this root file under ~150 lines — Claude loads it every session.
      See README.md for full documentation. -->
 
 **Project:** [YOUR PROJECT NAME]
@@ -25,17 +25,18 @@
 
 ```
 [YOUR-PROJECT]/
-├── CLAUDE.md                    # This file (Claude Code instructions)
+├── CLAUDE.md                    # Root Claude Code instructions
 ├── AGENTS.md                    # Codex CLI instructions
 ├── MEMORY.md                    # Persistent [LEARN] entries across sessions
 ├── Makefile                     # Root — delegates to code/ and latex/
 ├── protocols/                   # Canonical shared skill bodies
 │   └── skills/
 │       └── *.md
-├── .claude/                     # Claude Code: rules, wrappers, agents, hooks
+├── .claude/                     # Claude Code: settings, wrappers, agents, hooks
 ├── .codex/                      # Codex CLI: config and permission rules
 ├── .agents/                     # Codex CLI: thin skill wrappers
 ├── code/                        # Analysis code with sub-Makefiles
+│   ├── CLAUDE.md                # Claude loads this when working in code/
 │   ├── Makefile                 # Delegates to sub-Makefiles
 │   ├── [task_group]/            # e.g., data cleaning (R/Stata), simulation (Julia), or structural model (MATLAB)
 │   │   ├── Makefile
@@ -44,6 +45,7 @@
 │       ├── Makefile
 │       └── ...
 ├── latex/                       # Paper manuscript and slides
+│   ├── CLAUDE.md                # Claude loads this when working in latex/
 │   ├── Makefile                 # pdflatex 3-pass build
 │   ├── manuscript.tex           # Main paper
 │   ├── slides.tex               # Presentation slides
@@ -123,6 +125,26 @@ pdflatex -interaction=nonstopmode manuscript.tex
 - Canonical shared skill bodies live in `protocols/skills/`
 - `.claude/skills/` and `.agents/skills/` are thin wrappers around those files
 - Review-oriented agents in `.claude/agents/` execute the same canonical protocols
+
+## Claude Loading Model
+
+- Root `CLAUDE.md` sets project-wide workflow rules
+- `code/CLAUDE.md` loads when Claude works in `code/`
+- `latex/CLAUDE.md` loads when Claude works in `latex/`
+- Shared local conventions live in `AGENTS.md`, `code/AGENTS.md`, and
+  `latex/AGENTS.md`
+- `.claude/agents/` and `.claude/hooks/` remain Claude-only execution surfaces
+  and mechanics
+
+## Claude-Specific Notes
+
+- Enter plan mode before non-trivial tasks and exit only after the user
+  approves the plan
+- Prefer auto-compression over `/clear`; use `/clear` only when context is
+  genuinely polluted
+- After compression or a new session, read `CLAUDE.md`, read the most recent
+  plan in `quality_reports/plans/`, then inspect `git log --oneline -10` and
+  `git diff`
 
 ---
 
