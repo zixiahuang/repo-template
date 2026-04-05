@@ -55,8 +55,7 @@ git worktree remove /tmp/branch-compare-base
 
 ## Important
 
-- Follow the Output Verification Formats guidance in `AGENTS.md` or
-  `.claude/rules/verification-formats.md` for which formats are
-  checksum-stable.
+- Follow the Output Verification Formats guidance in `AGENTS.md` for which
+  formats are checksum-stable.
 - Always clean up the worktree.
 - Do not modify files on either branch.

@@ -48,8 +48,7 @@ PROTOCOL_REQUIRED_SNIPPETS = {
     "protocols/skills/compare-branches.md": (
         "run `make -n`",
         "rebuild them with `make`",
-        "Output Verification Formats guidance in `AGENTS.md` or",
-        "`.claude/rules/verification-formats.md`",
+        "Output Verification Formats guidance in `AGENTS.md`",
     ),
     "protocols/skills/setup-makefile.md": (
         "`.R`, `.jl`, `.do`, `.ado`, and `.m`",
@@ -82,26 +81,6 @@ PATH_MODEL_REQUIRED_SNIPPETS = {
         "OUTPUT_ROOT = ../../output",
         "Use forward slashes in any literal filepath",
     ),
-    ".claude/rules/r-code-conventions.md": (
-        'output_root = file.path("..", "..", "output")',
-        "Use forward slashes in any literal filepath",
-    ),
-    ".claude/rules/julia-code-conventions.md": (
-        'output_root = joinpath("..", "..", "output")',
-        "Use forward slashes in any literal filepath",
-    ),
-    ".claude/rules/stata-code-conventions.md": (
-        'local output_root "../../output"',
-        "Use forward slashes in any literal filepath",
-    ),
-    ".claude/rules/matlab-code-conventions.md": (
-        'output_root = fullfile("..", "..", "output");',
-        "Use forward slashes in any literal filepath",
-    ),
-    ".claude/rules/makefile-conventions.md": (
-        "OUTPUT_ROOT = ../../output",
-        "$(OUTPUT_ROOT)/tables/results.csv: analysis.R | $(OUTPUT_ROOT)/tables",
-    ),
     "README.md": (
         "working-directory-relative",
         'output_root = file.path("..", "..", "output")',
@@ -120,27 +99,19 @@ PATH_MODEL_FORBIDDEN_SNIPPETS = {
         'save "output/tables/my_results.dta", replace',
         'fullfile("output", "tables", "results.csv")',
     ),
-    ".claude/rules/r-code-conventions.md": (
-        "relative to repository root",
-        'file.path("output", "figures", "my_plot.pdf")',
-    ),
-    ".claude/rules/julia-code-conventions.md": (
-        "relative to repository root",
-        'joinpath("output", "figures", "my_plot.pdf")',
-    ),
-    ".claude/rules/stata-code-conventions.md": (
-        "relative to repository root",
-        'save "output/tables/my_results.dta", replace',
-    ),
-    ".claude/rules/matlab-code-conventions.md": (
-        "relative to repository root",
-        'fullfile("output", "tables", "results.csv")',
-    ),
-    ".claude/rules/makefile-conventions.md": (
-        "code/analysis.R | output/tables",
-        "code/%.R | output/tables",
-    ),
 }
+
+CLAUDE_WRAPPER_REQUIRED_SNIPPETS = {
+    "code/CLAUDE.md": ("[AGENTS.md](./AGENTS.md)", "source of truth"),
+    "latex/CLAUDE.md": ("[AGENTS.md](./AGENTS.md)", "source of truth"),
+}
+
+LEGACY_RULE_REFERENCE_GLOBS = (
+    "README.md",
+    "CLAUDE.md",
+    "protocols/skills/*.md",
+    ".claude/agents/*.md",
+)
 
 
 def load_claude_bash_permissions() -> set[str]:
@@ -274,6 +245,36 @@ def check_path_model_snippets(errors: list[str]) -> None:
                 )
 
 
+def check_claude_wrappers(errors: list[str]) -> None:
+    for relative_path, snippets in CLAUDE_WRAPPER_REQUIRED_SNIPPETS.items():
+        file_path = REPO_ROOT / relative_path
+        file_text = file_path.read_text()
+
+        for snippet in snippets:
+            if snippet not in file_text:
+                errors.append(
+                    f"{file_path.relative_to(REPO_ROOT)} is missing required Claude-wrapper text: {snippet!r}"
+                )
+
+
+def check_no_legacy_rule_refs(errors: list[str]) -> None:
+    for pattern in LEGACY_RULE_REFERENCE_GLOBS:
+        for file_path in REPO_ROOT.glob(pattern):
+            file_text = file_path.read_text()
+            if ".claude/rules/" in file_text:
+                errors.append(
+                    f"{file_path.relative_to(REPO_ROOT)} still references deleted .claude/rules content"
+                )
+
+
+def check_claude_rules_dir(errors: list[str]) -> None:
+    rule_files = sorted(
+        path.relative_to(REPO_ROOT) for path in (REPO_ROOT / ".claude/rules").glob("*.md")
+    )
+    if rule_files:
+        errors.append(f".claude/rules still contains markdown files: {rule_files}")
+
+
 def main() -> int:
     errors: list[str] = []
 
@@ -312,6 +313,9 @@ def main() -> int:
     check_commit_protocol_branch_policy(errors)
     check_protocol_required_snippets(errors)
     check_path_model_snippets(errors)
+    check_claude_wrappers(errors)
+    check_no_legacy_rule_refs(errors)
+    check_claude_rules_dir(errors)
 
     if errors:
         print("Template consistency check failed:")

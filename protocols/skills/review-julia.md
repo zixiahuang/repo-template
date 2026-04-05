@@ -9,7 +9,7 @@ Run the comprehensive Julia code review protocol.
    - If the argument is `all`, review all Julia scripts in `code/`.
 
 2. **For each script, follow the review protocol below:**
-   - Read `code/AGENTS.md` or `.claude/rules/julia-code-conventions.md`.
+   - Read the Julia section of `code/AGENTS.md`.
    - Save the report to `quality_reports/[script_name]_julia_review.md`.
 
 3. **After all reviews complete, present a summary:**

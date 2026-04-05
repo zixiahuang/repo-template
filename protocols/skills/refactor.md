@@ -11,16 +11,13 @@ changes.
 
 ### 2. Read the Applicable Conventions
 
-Read the relevant language conventions:
+Read the relevant language conventions in `code/AGENTS.md`:
 
-- R: `.claude/rules/r-code-conventions.md` or the R section of `code/AGENTS.md`
-- Julia: `.claude/rules/julia-code-conventions.md` or the Julia section of
-  `code/AGENTS.md`
-- MATLAB: `.claude/rules/matlab-code-conventions.md` or the MATLAB section of
-  `code/AGENTS.md`
+- R: R section
+- Julia: Julia section
+- MATLAB: MATLAB section
 
-Also read the refactoring protocol from `.claude/rules/refactoring-protocol.md`
-or the Refactoring Protocol section of `AGENTS.md`.
+Also read the Refactoring Protocol section of `AGENTS.md`.
 
 ### 3. Apply Only Approved Transformations
 

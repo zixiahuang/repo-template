@@ -4,7 +4,9 @@
 
 A ready-to-fork starter kit for researchers using [Claude Code](https://code.claude.com/docs/en/overview) or [OpenAI Codex CLI](https://github.com/openai/codex) with **Make + R + Julia + Stata + MATLAB** build systems. You describe what you want; the assistant plans the approach, implements it, builds via Make, runs specialized review skills, fixes issues, and presents results — like a contractor who handles the entire job.
 
-**Both tools are supported.** Claude Code uses `.claude/` + `CLAUDE.md`; Codex CLI uses `.codex/` + `.agents/` + `AGENTS.md`. The same workflow, quality gates, and skills work with either.
+**Both tools are supported.** Claude Code uses a `CLAUDE.md` hierarchy plus
+`.claude/`; Codex CLI uses an `AGENTS.md` hierarchy plus `.codex/` and
+`.agents/`. The same workflow, quality gates, and skills work with either.
 
 ---
 
@@ -40,7 +42,11 @@ Then paste the following, filling in your project details:
 >
 > Enter plan mode and start by adapting the workflow configuration for this project.
 
-**What this does:** Claude reads all the configuration files, sets up your `code/` directory with sub-Makefiles for each pipeline stage, fills in your project details, then enters contractor mode — planning, implementing, reviewing, and verifying autonomously.
+**What this does:** Claude reads the root and nested `CLAUDE.md` files plus the
+tool-specific `.claude/` configuration, sets up your `code/` directory with
+sub-Makefiles for each pipeline stage, fills in your project details, then
+enters contractor mode — planning, implementing, reviewing, and verifying
+autonomously.
 
 ### 3. Configure Hooks (Optional)
 
@@ -134,10 +140,10 @@ Codex project configuration lives in:
 
 | Aspect | Claude Code | Codex CLI |
 |--------|-------------|-----------|
-| Instructions file | `CLAUDE.md` | `AGENTS.md` (hierarchical) |
+| Instructions file | `CLAUDE.md` hierarchy | `AGENTS.md` hierarchy |
 | Settings | `.claude/settings.json` (JSON) | `.codex/config.toml` (TOML) |
 | Permission rules | Glob patterns in settings.json | `.codex/rules/default.rules` (Starlark) |
-| Project conventions | `.claude/rules/*.md` (separate files) | Inlined into `AGENTS.md` hierarchy |
+| Project conventions | `CLAUDE.md` hierarchy plus shared `AGENTS.md` local conventions | `AGENTS.md` hierarchy |
 | Shared skill bodies | `protocols/skills/*.md` | `protocols/skills/*.md` |
 | Agent definitions | `.claude/agents/*.md` | Not supported |
 | Skills | Thin wrappers in `.claude/skills/*/SKILL.md` | Thin wrappers in `.agents/skills/*/SKILL.md` |
@@ -206,7 +212,7 @@ You describe a task. Claude:
 1. **Plans** the approach (enter plan mode, save to disk)
 2. **Implements** the code
 3. **Verifies** via `make -n` then `make` — builds stale targets (including `make -C latex` for the manuscript), checks exit codes
-4. **Reviews** with specialized agents (r-reviewer, julia-reviewer, stata-reviewer, matlab-reviewer, verifier)
+4. **Reviews** with specialized agents (r-reviewer, julia-reviewer, stata-reviewer, matlab-reviewer, makefile-reviewer)
 5. **Fixes** issues found by reviewers
 6. **Scores** against quality gates
 
@@ -240,9 +246,6 @@ Focused agents each check one dimension:
 | `domain-reviewer` | Substantive manuscript/slide review: identification, derivations, citations, code-theory alignment |
 | `proofreader` | Grammar, typos, overflow risks, and consistency for academic documents |
 | `makefile-reviewer` | Makefile conventions, dependency correctness, script coverage |
-| `verifier` | End-to-end build verification, orphaned script detection |
-
-The verifier runs an **orphaned script check**: every `.R`, `.jl`, `.do`, `.ado`, and `.m` file under `code/` must appear as a prerequisite in some Makefile. Scripts with no Makefile target get flagged.
 
 For manuscript or slide tasks, the orchestrator can also run **opt-in review passes** after the review-fix loop completes:
 - `domain-reviewer` for substantive identification and citation checks
@@ -257,14 +260,14 @@ Every file gets a score (0–100). Scores below threshold block the action:
 - **90** — PR threshold
 - **95** — excellence (aspirational)
 
-Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles, and LaTeX manuscripts. See `.claude/rules/quality-gates.md` for the full deduction table.
+Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles, and LaTeX manuscripts. See `AGENTS.md` for the full deduction table.
 
 ---
 
 ## What's Included
 
 <details>
-<summary><strong>Agents, skills, and rules</strong> (click to expand)</summary>
+<summary><strong>Agents, skills, and guidance</strong> (click to expand)</summary>
 
 ### Agents (`.claude/agents/`)
 
@@ -278,7 +281,6 @@ Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles
 | `proofreader` | Academic proofreading for manuscripts, slides, and notes |
 | `tex-reviewer` | LaTeX hardcoded-number review for manuscripts and slides |
 | `makefile-reviewer` | Makefile conventions, dependency correctness, script coverage |
-| `verifier` | End-to-end build verification with orphaned script check |
 
 ### Key Skills (`.claude/skills/`)
 
@@ -307,26 +309,27 @@ Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles
 
 Canonical bodies for all 18 shared skills. Both `.claude/skills/` and `.agents/skills/` point at these files, and Claude review agents execute the same protocol files rather than owning separate copies.
 
-### Key Rules (`.claude/rules/`)
+### Shared Guidance Surfaces
 
-| Rule | What It Enforces |
-|------|-----------------|
-| `makefile-conventions` | Standard Make patterns: `.PHONY`, order-only prereqs, pattern rules, joint production |
-| `r-code-conventions` | R coding standards, Makefile-based directory creation |
-| `julia-code-conventions` | Julia coding standards, Makefile-based directory creation |
-| `stata-code-conventions` | Stata coding standards, merge safety, and batch workflow discipline |
-| `matlab-code-conventions` | MATLAB coding standards, solver configuration, derivative correctness |
-| `refactoring-protocol` | Verify-refactor-verify loop, prohibited/approved transformations |
-| `solver-debugging-protocol` | Systematic diagnostic checklist for numerical solver failures |
-| `verification-formats` | Which output formats are checksum-stable and how to compare each |
-| `quality-gates` | 80/90/95 scoring for R, Julia, Stata, MATLAB, Makefiles, and LaTeX |
-| `verification-protocol` | Make-first verification, then file-specific checks |
-| `orchestrator-protocol` | Contractor mode: implement, verify via Make, review, fix, score |
-| `orchestrator-research` | Simplified loop for R/Julia/Stata/MATLAB scripts |
-| `plan-first-workflow` | Plan mode for non-trivial tasks |
-| `session-logging` | Proactive session logging: post-plan, incremental, end-of-session |
-| `bash-conventions` | One command per Bash call for permission glob matching |
-| `replication-protocol` | Reproducibility standards for data, code, and output |
+| File | What It Covers |
+|------|----------------|
+| `AGENTS.md` | Core workflow, orchestrators, quality gates, verification, session logging, replication |
+| `code/AGENTS.md` | Shared R, Julia, Stata, MATLAB, path, and Makefile conventions |
+| `latex/AGENTS.md` | Shared LaTeX build, manuscript, and dynamic-number conventions |
+| `CLAUDE.md` | Claude-specific loading model, plan-mode notes, and tool-specific mechanics |
+| `code/CLAUDE.md` | Claude entry point that loads the shared code conventions |
+| `latex/CLAUDE.md` | Claude entry point that loads the shared LaTeX conventions |
+
+### Claude Code Configuration
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `CLAUDE.md` (root) | Project root | Core workflow rules and project-wide instructions |
+| `code/CLAUDE.md` | `code/` | Claude entry point for shared code conventions |
+| `latex/CLAUDE.md` | `latex/` | Claude entry point for shared LaTeX conventions |
+| `.claude/agents/*.md` | `.claude/agents/` | Review-oriented Claude execution surfaces |
+| `.claude/hooks/*` | `.claude/hooks/` | Optional Claude-only hook scripts |
+| `.claude/skills/*/SKILL.md` | `.claude/skills/` | Thin Claude wrappers around shared protocols |
 
 ### Codex CLI Configuration
 
@@ -447,7 +450,7 @@ Claude also has a tool-specific execution layer in **`.claude/agents/`** for rev
 | Command permissions | `.claude/settings.json.example` and `.codex/rules/default.rules` | Yes |
 | Shared skill bodies | `protocols/skills/*.md` | Yes |
 | Skill wrapper names and descriptions | `.claude/skills/*/SKILL.md` and `.agents/skills/*/SKILL.md` | Yes |
-| Project conventions | `.claude/rules/*.md` and the `AGENTS.md` hierarchy | Yes |
+| Project conventions | `CLAUDE.md`, `code/CLAUDE.md`, `latex/CLAUDE.md`, and the `AGENTS.md` hierarchy | Yes |
 
 ### What intentionally differs
 
@@ -487,7 +490,7 @@ clean. Keep only placeholder `.gitkeep` files and intentional template assets.
 
 ```
 my-project/
-├── CLAUDE.md                    # Claude Code instructions (loaded every session)
+├── CLAUDE.md                    # Root Claude Code instructions
 ├── AGENTS.md                    # Codex CLI instructions (loaded every session)
 ├── Makefile                     # Root — delegates to code/ and latex/
 ├── protocols/
@@ -496,6 +499,7 @@ my-project/
 ├── .codex/                      # Codex CLI: config and permission rules
 ├── .agents/                     # Codex CLI: thin skill wrappers
 ├── code/
+│   ├── CLAUDE.md                # Claude instructions for code/
 │   ├── Makefile                 # Delegates to sub-Makefiles
 │   ├── [task_group_a]/          # e.g., data cleaning (R or Stata)
 │   │   ├── Makefile
@@ -507,6 +511,7 @@ my-project/
 │       ├── Makefile
 │       └── *.R, *.jl, *.do, *.ado, or *.m
 ├── latex/
+│   ├── CLAUDE.md                # Claude instructions for latex/
 │   ├── Makefile                 # pdflatex 3-pass build
 │   ├── manuscript.tex           # Main paper
 │   ├── slides.tex               # Presentation slides
@@ -520,7 +525,7 @@ my-project/
 └── templates/                   # Session log, quality report templates
 ```
 
-Each `code/[task_group]/Makefile` follows the conventions in `.claude/rules/makefile-conventions.md`: `all` and `clean` targets, order-only prerequisites for directories, pattern rules for parametric outputs, and `.PRECIOUS` for expensive intermediates.
+Each `code/[task_group]/Makefile` follows the conventions in `code/AGENTS.md`: `all` and `clean` targets, order-only prerequisites for directories, pattern rules for parametric outputs, and `.PRECIOUS` for expensive intermediates.
 
 ---
 

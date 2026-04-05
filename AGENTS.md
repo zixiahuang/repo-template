@@ -38,7 +38,7 @@
 │       └── default.rules        # Command execution permissions (Starlark)
 ├── .agents/                     # Codex skill wrappers
 │   └── skills/                  # Skill definitions
-├── .claude/                     # Claude Code rules, wrappers, agents, hooks
+├── .claude/                     # Claude Code settings, wrappers, agents, hooks
 ├── code/                        # Analysis code with sub-Makefiles
 │   ├── AGENTS.md                # R/Julia/Stata/MATLAB/Makefile conventions (Codex)
 │   ├── Makefile                 # Delegates to sub-Makefiles
@@ -229,6 +229,7 @@ When user says "just do it" / "handle it":
 - Modifying solver configuration or tolerances
 - Removing or restructuring error handling
 - Changing data types or precision
+- Refactoring loops into vectorized form (or vice versa) in numerical code
 
 When in doubt, ask before changing.
 
@@ -254,8 +255,23 @@ When debugging numerical solver failures (MATLAB, Julia, Python):
 - Change the solver algorithm without explicit approval
 - Propose fixes before completing the diagnostic checklist
 - Guess at root causes -- show evidence
+- Add `try`/`catch` blocks just to suppress solver errors
+
+### Report Format
 
 Present diagnosis with evidence, then proposed fix. Wait for approval before implementing.
+
+```markdown
+## Diagnosis
+- **Symptom:** [what failed]
+- **First NaN/error at:** [file:line]
+- **Root cause:** [with evidence]
+- **Checklist completed:** [which steps, what was found]
+
+## Proposed Fix
+- [specific change with rationale]
+- [expected outcome]
+```
 
 ---
 
@@ -274,6 +290,14 @@ When comparing outputs before and after code changes:
 | .tex (generated) | Yes | MD5 or text diff |
 
 **Gold standard:** CSV checksums. Use these for refactoring verification. Skip binary formats.
+
+- **For `.dta` files:** compare with a reader such as `haven::read_dta()` or
+  export both versions to CSV first.
+- **For `.mat` files:** load both versions and compare variables with an
+  explicit tolerance.
+- **For `RDS` files:** compare with `all.equal()` or convert to CSV first.
+- **For figures:** use visual inspection only; do not checksum PDF or PNG
+  outputs.
 
 ---
 
@@ -506,6 +530,18 @@ If a Makefile governs the files being modified:
 2. Verify output files (`.mat`, `.csv`, `.tex`, or figures) were created with non-zero size
 3. Check file sizes are plausible and solver output/logs show successful convergence where relevant
 
+### For Code Pipelines:
+1. When the task adds, renames, or restructures scripts under `code/`, verify
+   that every `.R`, `.jl`, `.do`, `.ado`, and `.m` file appears as a
+   prerequisite in some Makefile target.
+2. Flag orphaned scripts as warnings. They may be dead code or missing from the
+   build graph.
+
+### Common Pitfalls
+
+- **Relative paths:** use paths relative to the Makefile's directory
+- **Assuming success:** verify output files exist and contain plausible content
+
 ### Verification Checklist:
 ```
 [ ] Output file created successfully
@@ -619,7 +655,10 @@ Save to `quality_reports/[project]_replication_report.md`:
 
 ### Phase 4: Only Then Extend
 
-After replication is verified (all targets PASS), commit and begin extensions.
+After replication is verified (all targets PASS):
+
+- Commit the verified replication baseline with a clear message
+- Then begin extensions from that checked baseline
 
 ---
 
