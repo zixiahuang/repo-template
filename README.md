@@ -313,7 +313,7 @@ Canonical bodies for all 18 shared skills. Both `.claude/skills/` and `.agents/s
 
 | File | What It Covers |
 |------|----------------|
-| `AGENTS.md` | Core workflow, orchestrators, quality gates, verification, session logging, replication |
+| `AGENTS.md` | Core workflow, orchestrators, quality gates, verification, and session logging |
 | `code/AGENTS.md` | Shared R, Julia, Stata, MATLAB, path, and Makefile conventions |
 | `latex/AGENTS.md` | Shared LaTeX build, manuscript, and dynamic-number conventions |
 | `CLAUDE.md` | Claude-specific loading model, plan-mode notes, and tool-specific mechanics |

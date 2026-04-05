@@ -585,83 +585,6 @@ Issue one command per shell execution. Do not chain commands with `&&` or `;`. T
 - **Independent commands** -- issue in parallel when possible (e.g., `git status` and `git diff`)
 - **Dependent commands** -- issue sequentially, waiting for each result before the next (e.g., `git add` then `git commit`)
 
----
-
-## Replication-First Protocol
-
-**Core principle:** Replicate original results to the dot BEFORE extending.
-
-### Phase 1: Inventory & Baseline
-
-Before writing any code:
-- Read the paper's replication README
-- Inventory replication package: language, data files, scripts, outputs
-- Record gold standard numbers from the paper
-- Store targets in `quality_reports/[project]_replication_targets.md` or as RDS
-
-### Phase 2: Translate & Execute
-
-- Follow code conventions for all coding standards
-- Translate line-by-line initially -- don't "improve" during replication
-- Match original specification exactly
-- Save all intermediate results as RDS or JLD2
-
-#### Stata to R Translation Pitfalls
-
-| Stata | R | Trap |
-|-------|---|------|
-| `reg y x, cluster(id)` | `feols(y ~ x, cluster = ~id)` | Stata clusters df-adjust differently from some R packages |
-| `areg y x, absorb(id)` | `feols(y ~ x \| id)` | Check demeaning method matches |
-| `probit` for PS | `glm(family=binomial(link="probit"))` | R default logit differs from probit defaults in some workflows |
-| `bootstrap, reps(999)` | Depends on method | Match seed, reps, and bootstrap type exactly |
-
-### Phase 3: Verify Match
-
-| Type | Tolerance | Rationale |
-|------|-----------|-----------|
-| Integers (N, counts) | Exact match | No reason for any difference |
-| Point estimates | < 0.01 | Rounding in paper display |
-| Standard errors | < 0.05 | Bootstrap/clustering variation |
-| P-values | Same significance level | Exact p may differ slightly |
-| Percentages | < 0.1pp | Display rounding |
-
-**If mismatch:** Do NOT proceed to extensions. Isolate which step introduces the difference.
-
-#### Replication Report
-
-Save to `quality_reports/[project]_replication_report.md`:
-
-```markdown
-# Replication Report: [Paper Author (Year)]
-**Date:** [YYYY-MM-DD]
-**Original language:** [Stata/R/etc.]
-**R translation:** [script path]
-
-## Summary
-- **Targets checked / Passed / Failed:** N / M / K
-- **Overall:** [REPLICATED / PARTIAL / FAILED]
-
-## Results Comparison
-
-| Target | Paper | Ours | Diff | Status |
-|--------|-------|------|------|--------|
-
-## Discrepancies (if any)
-- **Target:** X | **Investigation:** ... | **Resolution:** ...
-
-## Environment
-- R version, key packages (with versions), data source
-```
-
-### Phase 4: Only Then Extend
-
-After replication is verified (all targets PASS):
-
-- Commit the verified replication baseline with a clear message
-- Then begin extensions from that checked baseline
-
----
-
 ## Workflow Quick Reference
 
 **Model:** Contractor (you direct, Codex orchestrates)
@@ -670,5 +593,5 @@ After replication is verified (all targets PASS):
 Your instruction -> [PLAN] (if needed) -> Your approval -> [EXECUTE] -> [REPORT] -> Repeat
 ```
 
-**Ask the user when:** Design forks, code ambiguity, replication edge cases, scope questions.
+**Ask the user when:** Design forks, code ambiguity, methodological edge cases, scope questions.
 **Just execute when:** Obvious fixes, verification, documentation, plotting, deployment.
