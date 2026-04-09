@@ -2,7 +2,7 @@
 
 > **Work in progress.** This is a summary of how I use AI coding assistants for computational research — running analysis pipelines with Make, writing R, Julia, Stata, and MATLAB scripts, and managing build dependencies. I keep updating these files as I learn new things.
 
-A ready-to-fork starter kit for researchers using [Claude Code](https://code.claude.com/docs/en/overview) or [OpenAI Codex CLI](https://github.com/openai/codex) with **Make + R + Julia + Stata + MATLAB** build systems. You describe what you want; the assistant plans the approach, implements it, builds via Make, runs specialized review skills, fixes issues, and presents results — like a contractor who handles the entire job.
+A ready-to-fork starter kit for researchers using [Claude Code](https://code.claude.com/docs/en/overview) or [OpenAI Codex CLI](https://github.com/openai/codex) with **Make + R + Julia + Stata + MATLAB** build systems. You describe what you want; the assistant plans the approach, implements it, builds via Make, traces ambiguous failures, runs specialized review skills, records handoffs and durable learnings, fixes issues, and presents results — like a contractor who handles the entire job.
 
 **Both tools are supported.** Claude Code uses a `CLAUDE.md` hierarchy plus
 `.claude/`; Codex CLI uses an `AGENTS.md` hierarchy plus `.codex/` and
@@ -211,10 +211,12 @@ my-project/
 You describe a task. Claude:
 1. **Plans** the approach (enter plan mode, save to disk)
 2. **Implements** the code
-3. **Verifies** via `make -n` then `make` — builds stale targets (including `make -C latex` for the manuscript), checks exit codes
-4. **Reviews** with specialized agents (r-reviewer, julia-reviewer, stata-reviewer, matlab-reviewer, makefile-reviewer)
-5. **Fixes** issues found by reviewers
-6. **Scores** against quality gates
+3. **Writes handoff notes** at major stage boundaries for cross-cutting tasks
+4. **Verifies** via `make -n` then `make` — builds stale targets (including `make -C latex` for the manuscript), checks exit codes
+5. **Reviews** with specialized agents (r-reviewer, julia-reviewer, stata-reviewer, matlab-reviewer, makefile-reviewer, tracer when diagnosis is needed)
+6. **Fixes** issues found by reviewers or traces
+7. **Captures durable learnings** in `MEMORY.md` when non-obvious lessons emerge
+8. **Scores** against quality gates
 
 If the score meets threshold, Claude presents a summary. Say "just do it" and it auto-commits too.
 
@@ -233,6 +235,28 @@ When reviewers leave comments on a pull request, `/review-pr <PR#>` automates th
 
 Outdated threads (code has moved since the comment) are reported but never touched.
 
+### Trace (`/trace`)
+
+When the main question is causal rather than implementational, `/trace` runs a
+diagnostic workflow that:
+
+1. Restates the observation
+2. Generates competing hypotheses
+3. Collects evidence for and against each explanation
+4. Ranks the explanations by evidence strength
+5. Recommends the single best next probe
+
+This is useful for estimate shifts, merge-key problems, stale build behavior,
+solver failures, and code-manuscript mismatches.
+
+### Structured Handoffs and Learning
+
+For multi-file tasks, the workflow can write short handoff notes under
+`quality_reports/handoffs/` so planning, implementation, verification, and
+review do not depend only on live context. Durable project-specific lessons are
+stored in `MEMORY.md` using structured `[LEARN:category]` entries rather than
+loose bullets.
+
 ### Specialized Agents
 
 Focused agents each check one dimension:
@@ -246,6 +270,7 @@ Focused agents each check one dimension:
 | `domain-reviewer` | Substantive manuscript/slide review: identification, derivations, citations, code-theory alignment |
 | `proofreader` | Grammar, typos, overflow risks, and consistency for academic documents |
 | `makefile-reviewer` | Makefile conventions, dependency correctness, script coverage |
+| `tracer` | Evidence-driven diagnosis for ambiguous failures and output shifts |
 
 For manuscript or slide tasks, the orchestrator can also run **opt-in review passes** after the review-fix loop completes:
 - `domain-reviewer` for substantive identification and citation checks
@@ -292,6 +317,8 @@ Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles
 | `/verify-outputs [script]` | Checksum outputs, compare to reference |
 | `/compare-branches [b1] [b2]` | Cross-branch output comparison via worktrees |
 | `/resume` | Recover context after compression/new session |
+| `/trace [question]` | Evidence-driven diagnosis for ambiguous failures and result shifts |
+| `/learn [insight]` | Save a durable, project-specific lesson to `MEMORY.md` |
 | `/setup-makefile [dir]` | Generate Makefile from directory contents |
 | `/review-pr [PR#]` | Address PR review comments, commit fixes, resolve threads |
 | `/review-r [file]` | R code quality review via r-reviewer agent |
@@ -307,7 +334,7 @@ Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles
 
 ### Shared Skill Protocols (`protocols/skills/`)
 
-Canonical bodies for all 18 shared skills. Both `.claude/skills/` and `.agents/skills/` point at these files, and Claude review agents execute the same protocol files rather than owning separate copies.
+Canonical bodies for all 20 shared skills. Both `.claude/skills/` and `.agents/skills/` point at these files, and Claude review agents execute the same protocol files rather than owning separate copies.
 
 ### Shared Guidance Surfaces
 
@@ -341,7 +368,7 @@ Canonical bodies for all 18 shared skills. Both `.claude/skills/` and `.agents/s
 | `protocols/skills/*.md` | `protocols/skills/` | Canonical shared skill bodies |
 | `.codex/config.toml` | `.codex/` | Optional Codex project overrides for sandbox, approval, and model behavior |
 | `.codex/rules/default.rules` | `.codex/rules/` | Command execution permissions (Starlark) |
-| `.agents/skills/*/SKILL.md` | `.agents/skills/` | 18 thin wrappers around the shared protocols |
+| `.agents/skills/*/SKILL.md` | `.agents/skills/` | 20 thin wrappers around the shared protocols |
 
 </details>
 
@@ -481,8 +508,9 @@ Run `make check-template` to validate:
 When maintaining this template repo itself, treat ad hoc files under
 `quality_reports/` as branch-local working artifacts rather than permanent
 template content. Before merging back to `main`, remove task-specific plans,
-session logs, merge reports, and scratch directories so the default branch ships
-clean. Keep only placeholder `.gitkeep` files and intentional template assets.
+handoffs, session logs, merge reports, and scratch directories so the default
+branch ships clean. Keep only placeholder `.gitkeep` files and intentional
+template assets.
 
 ---
 
@@ -492,6 +520,7 @@ clean. Keep only placeholder `.gitkeep` files and intentional template assets.
 my-project/
 ├── CLAUDE.md                    # Root Claude Code instructions
 ├── AGENTS.md                    # Codex CLI instructions (loaded every session)
+├── MEMORY.md                    # Persistent structured [LEARN] entries
 ├── Makefile                     # Root — delegates to code/ and latex/
 ├── protocols/
 │   └── skills/                  # Canonical shared skill bodies
@@ -521,8 +550,8 @@ my-project/
 │   ├── figures/                 # Generated figures
 │   ├── tables/                  # Generated tables
 │   └── numbers/                 # Inline numbers for manuscript
-├── quality_reports/             # Plans, session logs, merge reports
-└── templates/                   # Session log, quality report templates
+├── quality_reports/             # Plans, handoffs, session logs, merge reports
+└── templates/                   # Session, handoff, learning, and quality templates
 ```
 
 Each `code/[task_group]/Makefile` follows the conventions in `code/AGENTS.md`: `all` and `clean` targets, order-only prerequisites for directories, pattern rules for parametric outputs, and `.PRECIOUS` for expensive intermediates.

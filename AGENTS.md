@@ -17,7 +17,7 @@
 - **Verify after** -- compile/render and confirm output at the end of every task
 - **Single source of truth** -- `latex/manuscript.tex` is authoritative for the paper
 - **Quality gates** -- nothing ships below 80/100
-- **[LEARN] tags** -- when corrected, save `[LEARN:category] wrong -> right` to MEMORY.md
+- **Structured [LEARN] tags** -- when corrected or when you discover a durable lesson, save a structured `[LEARN:category]` entry to `MEMORY.md`
 
 ---
 
@@ -56,8 +56,8 @@
 │   ├── figures/                 # Generated figures
 │   ├── tables/                  # Generated tables
 │   └── numbers/                 # Inline numbers for manuscript (\newcommand .txt files)
-├── quality_reports/             # Plans, session logs, merge reports
-└── templates/                   # Session log, quality report templates
+├── quality_reports/             # Plans, handoffs, session logs, merge reports
+└── templates/                   # Session, handoff, learning, and quality templates
 ```
 
 ---
@@ -106,6 +106,8 @@ pdflatex -interaction=nonstopmode manuscript.tex
 | `/verify-outputs [script]` | Checksum outputs, compare to reference |
 | `/compare-branches [b1] [b2]` | Cross-branch output comparison |
 | `/resume` | Recover context after compression/new session |
+| `/trace [question]` | Trace an ambiguous result or failure back to its most likely cause |
+| `/learn [insight]` | Save a durable, project-specific lesson to `MEMORY.md` |
 | `/setup-makefile [dir]` | Generate Makefile from directory contents |
 | `/review-r [file]` | R code quality review |
 | `/review-julia [file]` | Julia code quality review |
@@ -195,6 +197,25 @@ When user says "just do it" / "handle it":
 - Still run the full verify-review-fix loop
 - Still present the summary
 
+### Structured Handoff Rule
+
+For multi-file or cross-cutting tasks, write a short handoff note before moving
+between major stages. Use `templates/handoff.md` and save notes under:
+
+```
+quality_reports/handoffs/YYYY-MM-DD_description/
+```
+
+Default stage boundaries:
+
+- `01_plan-to-implement.md`
+- `02_implement-to-verify.md`
+- `03_verify-to-review.md`
+- `04_review-to-summary.md`
+
+Skip handoffs for trivial single-script tasks handled entirely inside the
+simplified research orchestrator.
+
 ---
 
 ## Refactoring Protocol
@@ -275,6 +296,25 @@ Present diagnosis with evidence, then proposed fix. Wait for approval before imp
 
 ---
 
+## General Trace Protocol
+
+Use `/trace [observation]` when the main question is causal rather than
+implementational.
+
+Good fits:
+
+- estimates changed unexpectedly
+- merge or reshape outputs look wrong
+- build dependencies behave unexpectedly
+- outputs disagree across code, tables, and manuscript
+- a failure is real but the cause is not yet clear
+
+`/trace` should produce a ranked diagnosis with evidence, not a guessed fix.
+For numerical solver failures, combine it with the solver debugging checklist
+above.
+
+---
+
 ## Output Verification Formats
 
 When comparing outputs before and after code changes:
@@ -351,7 +391,7 @@ Plan approved -> orchestrator activates
 ### The Protocol
 
 1. **Think through the approach** before coding
-2. **Check MEMORY.md** for `[LEARN]` entries relevant to this task
+2. **Check MEMORY.md** for structured `[LEARN]` entries relevant to this task
 3. **Draft the plan** -- what changes, which files, in what order
 4. **Save to disk** -- write to `quality_reports/plans/YYYY-MM-DD_short-description.md`
 5. **Manuscript review opt-in** -- if the task touches manuscript or slides (`latex/`), ask:
@@ -381,8 +421,9 @@ Format: Status (DRAFT/APPROVED/COMPLETED), approach, files to modify, verificati
 
 After compression or a new session:
 1. Read `AGENTS.md` and the most recent plan in `quality_reports/plans/`
-2. Check `git log --oneline -10` and `git diff`
-3. State what you understand the current task to be
+2. Read the most recent relevant handoff in `quality_reports/handoffs/`, if one exists
+3. Check `git log --oneline -10` and `git diff`
+4. State what you understand the current task to be
 
 ---
 
@@ -568,11 +609,46 @@ If a Makefile governs the files being modified:
 Generated **only at merge time** -- not at every commit or PR.
 Save to `quality_reports/merges/YYYY-MM-DD_[branch-name].md` using `templates/quality-report.md`.
 
+## Structured Handoffs
+
+**Location:** `quality_reports/handoffs/YYYY-MM-DD_description/`
+**Template:** `templates/handoff.md`
+
+Write handoffs only when stage boundaries matter. Each note should be short and
+contain:
+
+- decisions made
+- alternatives rejected
+- active risks
+- files touched or relevant
+- what the next stage must verify or do
+
+## Structured Learning
+
+Use `/learn` or append directly to `MEMORY.md` when a lesson is both
+project-specific and likely to recur.
+
+Required format:
+
+```markdown
+[LEARN:category]
+- Date: YYYY-MM-DD
+- Trigger: [symptom, mistake, or question]
+- Wrong: [incorrect assumption or behavior]
+- Right: [correct rule or approach]
+- Scope: [where this applies]
+- Evidence: [file, command, output, or user correction]
+- Action: [what to do next time]
+```
+
+Do not save generic advice. Save only durable lessons that would materially help
+future work.
+
 ### Template Repo Hygiene
 
 When maintaining this template repository itself, treat ad hoc files under
 `quality_reports/` as branch-local artifacts. Before merging back to `main`,
-remove task-specific plans, session logs, merge reports, and scratch
+remove task-specific plans, handoffs, session logs, merge reports, and scratch
 directories so the template stays fresh. Keep only `.gitkeep` placeholders and
 intentional template assets.
 
