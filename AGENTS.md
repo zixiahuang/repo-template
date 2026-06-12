@@ -105,7 +105,7 @@ pdflatex -interaction=nonstopmode manuscript.tex
 | `/refactor [file-or-dir]` | Verify-refactor-verify loop |
 | `/verify-outputs [script]` | Checksum outputs, compare to reference |
 | `/compare-branches [b1] [b2]` | Cross-branch output comparison |
-| `/resume` | Recover context after compression/new session |
+| `/resume-custom` | Recover context after compression/new session |
 | `/trace [question]` | Trace an ambiguous result or failure back to its most likely cause |
 | `/learn [insight]` | Save a durable, project-specific lesson to `MEMORY.md` |
 | `/setup-makefile [dir]` | Generate Makefile from directory contents |
