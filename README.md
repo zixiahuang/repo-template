@@ -316,7 +316,7 @@ Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles
 | `/refactor [file-or-dir]` | Verify-refactor-verify loop for safe style changes |
 | `/verify-outputs [script]` | Checksum outputs, compare to reference |
 | `/compare-branches [b1] [b2]` | Cross-branch output comparison via worktrees |
-| `/resume` | Recover context after compression/new session |
+| `/resume-custom` | Recover context after compression/new session |
 | `/trace [question]` | Evidence-driven diagnosis for ambiguous failures and result shifts |
 | `/learn [insight]` | Save a durable, project-specific lesson to `MEMORY.md` |
 | `/setup-makefile [dir]` | Generate Makefile from directory contents |
