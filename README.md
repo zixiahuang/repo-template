@@ -8,6 +8,8 @@ A ready-to-fork starter kit for researchers using [Claude Code](https://code.cla
 `.claude/`; Codex CLI uses an `AGENTS.md` hierarchy plus `.codex/` and
 `.agents/`. The same workflow, quality gates, and skills work with either.
 
+**This is a repo forked from Dr. Ivan Rudik's [Github repo ](https://github.com/irudik/repo-template).** I keep the whole repo structure while adding prompts specifically for empirical econ projects. Other setups are the same as the original repo.
+
 ---
 
 ## Quick Start: Claude Code (5 minutes)
