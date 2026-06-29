@@ -1,6 +1,6 @@
 # AI-Assisted Academic Research Template (Make + R/Julia/Stata/MATLAB)
 
-**This is a repo forked from Dr. Ivan Rudik's [Github repo ](https://github.com/irudik/repo-template).** I keep the whole repo structure while adding prompts specifically for empirical econ projects. Other setups are the same as the original repo.
+**This is a repo forked from Dr. Ivan Rudik's [Github repo ](https://github.com/irudik/repo-template).**
 
 > **Work in progress.** This is a summary of how I use AI coding assistants for computational research — running analysis pipelines with Make, writing R, Julia, Stata, and MATLAB scripts, and managing build dependencies. I keep updating these files as I learn new things.
 
@@ -9,13 +9,6 @@ A ready-to-fork starter kit for researchers using [Claude Code](https://code.cla
 **Both tools are supported.** Claude Code uses a `CLAUDE.md` hierarchy plus
 `.claude/`; Codex CLI uses an `AGENTS.md` hierarchy plus `.codex/` and
 `.agents/`. The same workflow, quality gates, and skills work with either.
-
-
----
-
-## Empirical Econ-Specific Prompts
-
-`AGENTS.md`: added econ-specific rules.
 
 ---
 
