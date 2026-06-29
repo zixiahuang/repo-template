@@ -525,7 +525,8 @@ my-project/
 ├── knowledge/                   # Project-specific empirical research context
 │   ├── README.md                # Reading order and knowledge-folder rules
 │   ├── project.md               # Research question, data, variables, identification
-│   └── findings.md              # Cumulative findings, evidence, and robustness status
+│   └── findings.md              # Cumulative established findings, evidence, and robustness status
+│   └── ideas.md                 # Evolving hypotheses, questions, and rough thoughts
 ├── protocols/
 │   └── skills/                  # Canonical shared skill bodies
 ├── .claude/                     # Claude Code: rules, wrappers, agents, hooks
