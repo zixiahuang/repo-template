@@ -1,10 +1,12 @@
-# AI-Assisted Academic Research Template (Make + R/Julia/Stata/MATLAB)
+# AI-Assisted Empirical Economics Workflow Template
 
 **This is a repo forked from Dr. Ivan Rudik's [Github repo ](https://github.com/irudik/repo-template).**
 
-> **Work in progress.** This is a summary of how I use AI coding assistants for computational research — running analysis pipelines with Make, writing R, Julia, Stata, and MATLAB scripts, and managing build dependencies. I keep updating these files as I learn new things.
+> **Work in progress.** This is a summary of how I use AI coding assistants for empirical economics research -- cleaning data, building analysis samples, estimating models, running robustness checks, producing tables and figures, and keeping manuscripts synchronized with computed results.
 
-A ready-to-fork starter kit for researchers using [Claude Code](https://code.claude.com/docs/en/overview) or [OpenAI Codex CLI](https://github.com/openai/codex) with **Make + R + Julia + Stata + MATLAB** build systems. You describe what you want; the assistant plans the approach, implements it, builds via Make, traces ambiguous failures, runs specialized review skills, records handoffs and durable learnings, fixes issues, and presents results — like a contractor who handles the entire job.
+A ready-to-fork starter kit for empirical economists using [Claude Code](https://code.claude.com/docs/en/overview) or [OpenAI Codex CLI](https://github.com/openai/codex) with a **Make-driven R/Stata workflow**. Julia and MATLAB support remain available for simulation, numerical optimization, and structural work, but the default workflow centers on reproducible empirical pipelines: raw-to-analysis data, estimation outputs, robustness checks, regression tables, figures, and dynamic manuscript numbers.
+
+You describe what you want; the assistant plans the approach, implements it, builds via Make, traces ambiguous failures, runs specialized review skills, records handoffs and durable learnings, fixes issues, and presents results -- like a contractor who handles the entire job.
 
 **Both tools are supported.** Claude Code uses a `CLAUDE.md` hierarchy plus
 `.claude/`; Codex CLI uses an `AGENTS.md` hierarchy plus `.codex/` and
@@ -34,11 +36,11 @@ claude
 
 Then paste the following, filling in your project details:
 
-> I am starting to work on **[PROJECT NAME]** in this repo. **[Describe your project in 2–3 sentences — what you're building, what data you use, what your pipeline stages are (e.g., data cleaning, estimation, figures).]**
+> I am starting to work on **[PROJECT NAME]** in this repo. **[Describe your empirical economics project in 2-3 sentences: research question, datasets, treatment or policy variation, identification strategy, and likely pipeline stages such as cleaning, sample construction, estimation, robustness, tables, and figures.]**
 >
 > I want our collaboration to be structured, precise, and rigorous. Code should be reproducible and build-system driven.
 >
-> I've set up the Claude Code academic workflow (forked from `irudik/repo-template`). The configuration files are already in this repo. Please read them, understand the workflow, and then **update all configuration files to fit my project** — fill in placeholders in `CLAUDE.md`, set up the `code/` directory structure with sub-Makefiles for my pipeline stages, and propose any customizations specific to my use case.
+> I've set up the Claude Code empirical economics workflow (forked from `irudik/repo-template`). The configuration files are already in this repo. Please read them, understand the workflow, and then **update all configuration files to fit my project** -- fill in placeholders in `CLAUDE.md`, fill out the `knowledge/` files with project context, set up the `code/` directory structure with sub-Makefiles for my pipeline stages, and propose any customizations specific to my use case.
 >
 > After that, use the plan-first workflow for all non-trivial tasks. Once I approve a plan, switch to contractor mode — coordinate everything autonomously and only come back to me when there's ambiguity or a decision to make.
 >
@@ -46,8 +48,8 @@ Then paste the following, filling in your project details:
 
 **What this does:** Claude reads the root and nested `CLAUDE.md` files plus the
 tool-specific `.claude/` configuration, sets up your `code/` directory with
-sub-Makefiles for each pipeline stage, fills in your project details, then
-enters contractor mode — planning, implementing, reviewing, and verifying
+sub-Makefiles for each empirical pipeline stage, fills in your project context,
+then enters contractor mode -- planning, implementing, reviewing, and verifying
 autonomously.
 
 ### 3. Configure Hooks (Optional)
@@ -131,7 +133,7 @@ Then paste the same project-description prompt as the Claude Code section above.
 Codex project configuration lives in:
 
 - **`AGENTS.md`** (root) — project instructions and workflow rules (loaded every session)
-- **`code/AGENTS.md`** — R, Julia, Stata, MATLAB, and Makefile conventions (loaded when working in `code/`)
+- **`code/AGENTS.md`** — R, Stata, Makefile, and optional Julia/MATLAB conventions (loaded when working in `code/`)
 - **`latex/AGENTS.md`** — LaTeX conventions (loaded when working in `latex/`)
 - **`protocols/skills/*.md`** — canonical shared skill bodies for both tools
 - **`.codex/config.toml`** — model, sandbox, and approval settings
@@ -165,28 +167,24 @@ Codex CLI does not support hooks, so these Claude Code features have no direct e
 
 ### Make as the Backbone
 
-A root Makefile delegates to `code/` (analysis pipeline) and `latex/` (manuscript):
+A root Makefile delegates to `code/` (empirical pipeline) and `latex/` (manuscript):
 
 ```
 my-project/
 ├── Makefile              # Root — delegates to code/ and latex/
 ├── code/
 │   ├── Makefile          # Delegates to sub-Makefiles
-│   ├── data_prep/
-│   │   ├── Makefile      # Targets for cleaning raw data
+│   ├── clean/
+│   │   ├── Makefile      # Targets for cleaning raw data and harmonizing sources
 │   │   ├── clean.do
 │   │   └── merge.R
+│   ├── build_sample/
+│   │   ├── Makefile      # Targets for sample construction and merge checks
+│   │   └── build_sample.do
 │   ├── estimation/
-│   │   ├── Makefile      # Targets for running models
+│   │   ├── Makefile      # Targets for main specifications and robustness checks
 │   │   ├── model.R
-│   │   └── bootstrap.R
-│   ├── simulation/
-│   │   ├── Makefile      # Targets for trade model simulation
-│   │   ├── simulate_trade.jl
-│   │   └── process_results.jl
-│   ├── structural_model/
-│   │   ├── Makefile      # Targets for numerical optimization
-│   │   └── solve_equilibrium.m
+│   │   └── robustness.do
 │   ├── tables/
 │   │   ├── Makefile      # Targets for regression tables
 │   │   └── reg_tables.do
@@ -203,7 +201,7 @@ my-project/
 
 - `make` from project root builds everything (code first, then latex)
 - `make -n` shows what would be rebuilt (dry-run)
-- `make -C code` rebuilds all code targets
+- `make -C code` rebuilds all empirical pipeline targets
 - `make -C code/estimation all` rebuilds one pipeline stage
 - `make -C latex` compiles the manuscript
 - Scripts never create directories — Makefiles own that via order-only prerequisites
@@ -287,7 +285,7 @@ Every file gets a score (0–100). Scores below threshold block the action:
 - **90** — PR threshold
 - **95** — excellence (aspirational)
 
-Rubrics cover R scripts, Julia scripts, Stata scripts, MATLAB scripts, Makefiles, and LaTeX manuscripts. See `AGENTS.md` for the full deduction table.
+Rubrics cover R scripts, Stata scripts, Makefiles, LaTeX manuscripts, and optional Julia/MATLAB scripts. See `AGENTS.md` for the full deduction table.
 
 ---
 
@@ -343,7 +341,7 @@ Canonical bodies for all 20 shared skills. Both `.claude/skills/` and `.agents/s
 | File | What It Covers |
 |------|----------------|
 | `AGENTS.md` | Core workflow, orchestrators, quality gates, verification, and session logging |
-| `code/AGENTS.md` | Shared R, Julia, Stata, MATLAB, path, and Makefile conventions |
+| `code/AGENTS.md` | Shared R, Stata, Makefile, and optional Julia/MATLAB conventions |
 | `latex/AGENTS.md` | Shared LaTeX build, manuscript, and dynamic-number conventions |
 | `CLAUDE.md` | Claude-specific loading model, plan-mode notes, and tool-specific mechanics |
 | `code/CLAUDE.md` | Claude entry point that loads the shared code conventions |
@@ -365,7 +363,7 @@ Canonical bodies for all 20 shared skills. Both `.claude/skills/` and `.agents/s
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | `AGENTS.md` (root) | Project root | Core instructions + workflow rules |
-| `code/AGENTS.md` | `code/` | R, Julia, Stata, MATLAB, and Makefile conventions |
+| `code/AGENTS.md` | `code/` | R, Stata, Makefile, and optional Julia/MATLAB conventions |
 | `latex/AGENTS.md` | `latex/` | LaTeX conventions |
 | `protocols/skills/*.md` | `protocols/skills/` | Canonical shared skill bodies |
 | `.codex/config.toml` | `.codex/` | Optional Codex project overrides for sandbox, approval, and model behavior |
@@ -383,9 +381,9 @@ Canonical bodies for all 20 shared skills. Both `.claude/skills/` and `.agents/s
 | [Claude Code](https://code.claude.com/docs/en/overview) or [Codex CLI](https://github.com/openai/codex) | AI assistant | `npm install -g @anthropic-ai/claude-code` or `npm install -g @openai/codex` |
 | [GNU Make](https://www.gnu.org/software/make/) | Build system | Pre-installed on macOS/Linux |
 | R | Data analysis, figures | [r-project.org](https://www.r-project.org/) |
-| Julia | Computation, simulation | [julialang.org](https://julialang.org/downloads/) |
+| Julia | Optional computation and simulation | [julialang.org](https://julialang.org/downloads/) |
 | Stata | Replication, cleaning, and panel workflows | Vendor installer; ensure `stata-mp`, `stata-se`, or `stata` is on `PATH` |
-| MATLAB | Numerical optimization and structural models | MathWorks installer; ensure `matlab` is on `PATH` |
+| MATLAB | Optional numerical optimization and structural models | MathWorks installer; ensure `matlab` is on `PATH` |
 | pdflatex | Manuscript compilation | Included with TeX Live / MacTeX |
 | [gh CLI](https://cli.github.com/) | PR workflow | `brew install gh` (macOS) |
 | [jq](https://jqlang.github.io/jq/) | Claude Code hooks and `/review-pr` thread parsing | `brew install jq` (macOS) |
@@ -524,6 +522,10 @@ my-project/
 ├── AGENTS.md                    # Codex CLI instructions (loaded every session)
 ├── MEMORY.md                    # Persistent structured [LEARN] entries
 ├── Makefile                     # Root — delegates to code/ and latex/
+├── knowledge/                   # Project-specific empirical research context
+│   ├── README.md                # Reading order and knowledge-folder rules
+│   ├── project.md               # Research question, data, variables, identification
+│   └── findings.md              # Cumulative findings, evidence, and robustness status
 ├── protocols/
 │   └── skills/                  # Canonical shared skill bodies
 ├── .claude/                     # Claude Code: rules, wrappers, agents, hooks
@@ -532,15 +534,15 @@ my-project/
 ├── code/
 │   ├── CLAUDE.md                # Claude instructions for code/
 │   ├── Makefile                 # Delegates to sub-Makefiles
-│   ├── [task_group_a]/          # e.g., data cleaning (R or Stata)
+│   ├── clean/                   # e.g., data cleaning and harmonization
 │   │   ├── Makefile
-│   │   └── *.R, *.jl, *.do, *.ado, or *.m
-│   ├── [task_group_b]/          # e.g., simulation (Julia or MATLAB)
+│   │   └── *.R, *.do, or *.ado
+│   ├── build_sample/            # e.g., merge checks and analysis samples
 │   │   ├── Makefile
-│   │   └── *.R, *.jl, *.do, *.ado, or *.m
-│   └── [task_group_c]/          # e.g., figures (R or Stata)
+│   │   └── *.R, *.do, or *.ado
+│   └── estimation/              # e.g., main specs and robustness checks
 │       ├── Makefile
-│       └── *.R, *.jl, *.do, *.ado, or *.m
+│       └── *.R, *.do, or *.ado
 ├── latex/
 │   ├── CLAUDE.md                # Claude instructions for latex/
 │   ├── Makefile                 # pdflatex 3-pass build

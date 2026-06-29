@@ -1,6 +1,9 @@
 # Code Pipeline Conventions
 
 These conventions apply to all scripts in `code/` and its subdirectories.
+The default empirical economics workflow is Make + R/Stata. Julia and MATLAB
+remain supported for projects that need simulation, numerical optimization, or
+structural modeling.
 
 ---
 
@@ -11,6 +14,20 @@ These conventions apply to all scripts in `code/` and its subdirectories.
 - Never write Windows-style backslashes in path literals
 - Path helpers such as `file.path()`, `joinpath()`, and `fullfile()` remain
   preferred for programmatic path construction
+
+---
+
+## Empirical Economics Pipeline Principles
+
+- Separate raw cleaning, sample construction, estimation, robustness checks,
+  tables, figures, and manuscript numbers into explicit Make targets.
+- Persist analysis datasets, estimation outputs, robustness outputs, tables,
+  figures, and dynamic-number files under the repo-root `output/` directory.
+- Treat merge keys, sample restrictions, fixed effects, clustering, weights,
+  and treatment timing as first-class research objects, not incidental code.
+- Check merge and reshape invariants before estimating anything downstream.
+- Keep computed results out of prose; write them to `output/numbers/` and input
+  them from LaTeX.
 
 ---
 
@@ -36,6 +53,10 @@ These conventions apply to all scripts in `code/` and its subdirectories.
 
 <!-- Customize for your field's known pitfalls -->
 - Verify estimator implementations match paper formulas (`latex/manuscript.tex`)
+- Make sample restrictions, treatment definitions, controls, fixed effects,
+  clusters, and weights explicit near the model code
+- Save main and robustness estimates in machine-readable outputs before
+  rendering tables or figures
 - Check known package bugs (document below in Common Pitfalls)
 
 ### 4. Visual Identity
@@ -122,6 +143,8 @@ writeLines("\\newcommand{\\myEstimate}{2.31}",
 |---------|--------|------------|
 | Missing `bg = "transparent"` | White boxes on slides | Always include in ggsave() |
 | Hardcoded paths | Breaks on other machines | Use relative paths |
+| Silent sample drift | Estimates change without explanation | Save sample counts and restriction logs |
+| Implicit clustering or weights | Wrong inferential target | Declare clustering and weights next to each specification |
 
 ### 7. Line Length & Mathematical Exceptions
 
@@ -138,12 +161,13 @@ writeLines("\\newcommand{\\myEstimate}{2.31}",
 [ ] Functions documented (Roxygen)
 [ ] Figures: transparent bg, explicit dimensions
 [ ] RDS: every computed object saved
+[ ] Estimation outputs include sample counts, specification labels, clusters, and weights where relevant
 [ ] Comments explain WHY not WHAT
 ```
 
 ---
 
-## Julia Code Standards
+## Optional Julia Code Standards
 
 **Standard:** Senior Principal Computational Scientist + PhD researcher quality
 
@@ -268,8 +292,11 @@ Prefer JLD2 for Julia-native objects. Use CSV for model output. When saving para
 - Check merge keys with `isid`, `duplicates report`, or `assert`
 - After `merge`, inspect `_merge` and assert the expected match pattern
 - After `reshape`, assert the expected observation count and key uniqueness
+- Log sample restrictions and assert expected observation counts after major filters
 - Set `xtset` / `tsset` explicitly for panel or time-series work
-- Match cluster, FE, and weight choices to the intended estimand
+- Match treatment timing, fixed effects, clustering, and weight choices to the intended estimand
+- Export main and robustness estimates with specification labels, sample sizes,
+  fixed effects, clusters, and weights preserved for table scripts
 
 ### 4. Output Paths
 
@@ -298,6 +325,8 @@ file close fh
 | Missing `version` | Results may change across Stata releases | Pin `version` at top |
 | Hardcoded paths or `cd` | Breaks on other machines | Use repo-relative paths only |
 | Unchecked `_merge` after `merge` | Silent sample corruption | Assert expected `_merge` values |
+| Unlogged sample restrictions | Results are hard to audit | Record counts before and after filters |
+| Mismatched FE or clustering | Wrong identifying variation or inference | Keep FE and cluster choices next to each specification |
 | Globals for routine state | Hidden dependencies across scripts | Prefer locals and `syntax` |
 | `capture` without `_rc` check | Real failures get silenced | Check `_rc` immediately |
 | Unbalanced `preserve` / `restore` | Wrong dataset state later in script | Keep blocks tight and paired |
@@ -316,6 +345,8 @@ file close fh
 [ ] All paths relative and no cd
 [ ] Programs documented and arguments validated with syntax
 [ ] merge/reshape steps checked with assert/isid/duplicates logic
+[ ] sample restrictions logged with before/after counts
+[ ] fixed effects, clustering, weights, and treatment timing are explicit
 [ ] Outputs saved under the repo-root output/ directory via relative paths
 [ ] Comments explain WHY not WHAT
 [ ] capture followed by _rc checks
@@ -324,7 +355,7 @@ file close fh
 
 ---
 
-## MATLAB Code Standards
+## Optional MATLAB Code Standards
 
 **Standard:** Senior Principal Computational Scientist + PhD researcher quality
 
@@ -425,6 +456,10 @@ instead of `output_root`), but the canonical subdirectories (`tables/`,
 ---
 
 ## Makefile Conventions
+
+Makefiles are the audit trail for the empirical pipeline. Every script that
+creates an analysis dataset, estimate, robustness result, table, figure, or
+dynamic manuscript number should be reachable from a Make target.
 
 ### Structure
 
@@ -532,3 +567,6 @@ The `code/Makefile` in turn delegates to sub-Makefiles in each task-group direct
 
 - `make -n` (dry-run) must produce a valid plan
 - Every `.R`, `.jl`, `.do`, `.ado`, and `.m` file under `code/` should appear as a prerequisite in some Makefile target -- orphaned scripts are a warning sign
+- Main estimates, robustness checks, tables, figures, and dynamic-number files
+  should be declared as explicit targets or prerequisites rather than produced
+  only as undocumented side effects

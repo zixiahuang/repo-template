@@ -1,4 +1,4 @@
-# AGENTS.md -- Academic Project Development with Codex CLI
+# AGENTS.md -- Empirical Economics Workflow with Codex CLI
 
 <!-- HOW TO USE: Replace [BRACKETED PLACEHOLDERS] with your project info.
      Keep this file under 32KB -- Codex loads it every session.
@@ -21,6 +21,25 @@
 
 ---
 
+## Project Knowledge Protocol
+
+Before planning or implementing non-trivial tasks, read:
+
+- `knowledge/README.md`
+- `knowledge/project.md`
+- `knowledge/findings.md`
+- `MEMORY.md`
+
+Treat `AGENTS.md` as workflow instructions and `knowledge/` as empirical
+research background. Store project-specific details -- research question,
+datasets, sample definitions, variables, treatment, identification, findings,
+open questions, and things to avoid -- in `knowledge/`, not in `AGENTS.md`.
+
+If additional knowledge files are created later, follow `knowledge/README.md`
+for the current reading order.
+
+---
+
 ## Folder Structure
 
 ```
@@ -29,6 +48,10 @@
 ├── CLAUDE.md                    # Claude Code instructions
 ├── MEMORY.md                    # Persistent [LEARN] entries across sessions
 ├── Makefile                     # Root -- delegates to code/ and latex/
+├── knowledge/                   # Project-specific empirical research context
+│   ├── README.md                # Reading order and knowledge-folder rules
+│   ├── project.md               # Research question, data, variables, identification
+│   └── findings.md              # Cumulative findings and evidence
 ├── protocols/                   # Canonical shared skill bodies
 │   └── skills/
 │       └── *.md
@@ -40,7 +63,7 @@
 │   └── skills/                  # Skill definitions
 ├── .claude/                     # Claude Code settings, wrappers, agents, hooks
 ├── code/                        # Analysis code with sub-Makefiles
-│   ├── AGENTS.md                # R/Julia/Stata/MATLAB/Makefile conventions (Codex)
+│   ├── AGENTS.md                # R/Stata/Makefile and optional Julia/MATLAB conventions
 │   ├── Makefile                 # Delegates to sub-Makefiles
 │   └── [task_group]/            # e.g., data cleaning, estimation, figures
 │       ├── Makefile
@@ -131,19 +154,19 @@ pdflatex -interaction=nonstopmode manuscript.tex
 
 ---
 
-## Current Project State
+## Template State
 
 | Component | File | Status | Description |
 |-----------|------|--------|-------------|
 | Manuscript | `latex/manuscript.tex` | Template | Paper skeleton with standard sections |
 | Slides | `latex/slides.tex` | Template | Presentation template |
-| Code pipeline | `code/` | Template | Sub-Makefiles to be added per project |
+| Empirical pipeline | `code/` | Template | Sub-Makefiles to be added per project |
 
 ---
 
 ## Orchestrator Protocol: Contractor Mode
 
-> Use this full loop for multi-file or cross-cutting changes. For single-file R/Julia/Stata/MATLAB script tasks, use the simplified research orchestrator below.
+> Use this full loop for multi-file or cross-cutting changes. For single-file R/Stata scripts, use the simplified research orchestrator below. Julia/MATLAB support remains available for projects that need simulation, numerical optimization, or structural models.
 
 **After a plan is approved, the orchestrator takes over autonomously.**
 
@@ -343,7 +366,7 @@ When comparing outputs before and after code changes:
 
 ## Research Orchestrator (Simplified)
 
-> Use this simplified loop for single-file R/Julia/Stata/MATLAB script tasks.
+> Use this simplified loop for single-file R/Stata script tasks. Use the same pattern for optional Julia/MATLAB scripts when a project includes them.
 
 ```
 Plan approved -> orchestrator activates
