@@ -21,27 +21,6 @@
 
 ---
 
-## Econ-Specific Rules
-
-Separate code into:
-- data cleaning and variable construction
-- descriptive analysis
-- estimation
-- robustness
-
-All figures and tables must be reproducible from the Makefile.
-
-Save raw data in data/raw/ and never commit it to GitHub.
-
-Save intermediate data in data/intermediate/.
-Save final analysis data in data/final/.
-Save figures in output/figures/.
-Save tables in output/tables/.
-
-Before finishing, run the relevant Makefile target if possible and summarize what changed.
-
----
-
 ## Folder Structure
 
 ```
